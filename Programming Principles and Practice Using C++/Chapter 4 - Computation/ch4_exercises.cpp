@@ -1373,41 +1373,319 @@ int main()
     }
 }
 
-Q20:    
-*/
+Q20:
+
 int main()
-{ 
+{
     pair<string, int>input;
     vector<string>names;
     vector<int>scores;
-    cout<<"Enter participant's name and score (NAME SCORE): "<<endl;
+    //
+    cout<<"Enter records: (Use 'No more' to exit prompt.): "<<endl;
     while(cin>>input.first>>input.second) 
     {
+        for(string n : names) 
+        {
+            if(n == input.first) 
+            {
+                error("Duplicate input ", input.first);
+            }
+        }
+        //
         names.push_back(input.first);
         scores.push_back(input.second);
     }
-    string temp;
-    bool double_input = false;
-    for(size_t i = 0;i < names.size();++i) 
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    // Search
+    string record_search;
+    cout<<"Search records (or CTRL+Z to exit): "<<endl;
+    while(cin>>record_search) 
     {
-        temp = names[i];
-        for(size_t j = i+1;j < names.size();++j) 
+        bool found = false;
+        for(size_t i = 0;i < names.size();++i) 
         {
-            if(names[j] == temp) 
+            if(record_search == names[i]) 
             {
-                double_input = true;
+                cout<<"Score: "<<scores[i]<<endl;
+                found = true;
+                break;
             }
         }
-        if(double_input) break;
-    }
-    if(double_input) error("Duplicate detected.");
-    /////////
-    string input_name = "";
-    cout<<"To search the record, enter users [NAME] (or CTRL + Z to exit): ";
-    cin>>input_name; 
-    for(size_t i = 0;i < names.size();++i) 
-    {
-        if(input_name == names[i]) {cout<<names[i]<<" "<<scores[i]<<" "<<endl;}
-        else if(input_name != names[i]) {cout<<"Name not found.";break;};
+        if(!found) cout<<"name not found"<<endl;
+        cout<<"Search another (or CTRL+Z to exit): "<<endl;
     }
 }
+
+Q21:
+
+int main()
+{
+    pair<string, int>input;
+    vector<string>names;
+    vector<int>scores;
+    //
+    cout<<"Enter records:"<<endl;
+    while(cin>>input.first>>input.second) 
+    {
+        for(const string& n : names) 
+        {
+            if(n == input.first) {error("Double input.", input.first);}
+        }
+        //
+        names.push_back(input.first);
+        scores.push_back(input.second);
+    }
+    // Clear read prompt
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    // We need to search the score;
+    int record_search;
+    cout<<"Search records: "<<endl;
+    while(cin>>record_search) 
+    {
+        bool found = false;
+        cout<<"Players with corresponding score(s): ";
+        for(size_t i = 0;i < scores.size();++i) 
+        {
+            if(record_search == scores[i]) 
+            {
+                cout<<names[i]<<" ";
+                found = true;
+            }
+        }
+        cout<<endl;
+        if(!found) cout<<"score not found"<<endl;
+        cout<<"Look for another (or CTRL+Z to exit): "<<endl;
+    }
+}
+    
+
+Exercises Take 2:
+
+Q2:
+
+int main()
+{
+    vector<double>sequence = {14.8, 55.1, 56.1, 9.9, 23.8, 10.3, 3.8, 32.8, 54.8, 15.6, 20.4, 29.5, 39.3, 49.3, 56.9, 51.9, 17.1, 13.9, 44.6};
+    double median;
+    int n = sequence.size();
+    //
+    sort(sequence.begin(), sequence.end());
+    if(n % 2 == 0) 
+    {
+        median = (sequence[n/2 - 1] + sequence[n/2]) / 2.0;
+    }
+    else 
+    {
+        median = sequence[n/2];
+    }
+    for(auto i : sequence) cout<<i<<" ";cout<<endl;
+    cout<<median;
+}
+
+Q3: 
+
+double sum(vector<double>& distances) 
+{
+    double sum;
+    for(size_t i = 0;i < distances.size();++i) sum+=distances[i];
+    
+    return sum;
+}
+
+double min_val(vector<double>& distances) 
+{
+    double smallest = *min_element(distances.begin(), distances.end());
+     
+    return smallest;
+}
+
+double max_val(vector<double>& distances) 
+{
+    double greatest = *max_element(distances.begin(), distances.end());
+    
+    return greatest;
+}
+
+double mean_val(vector<double>& distances) 
+{
+    double mean, sum;
+    int n;
+    for(auto i : distances) sum+=i; 
+    n = distances.size();
+    mean = sum/n;
+
+    return mean;
+}
+
+
+int main()
+{
+    vector<double>distances = {66442.88, 99649.74, 43487.98, 43085.33, 86825.17, 82010.81};
+    double total, smallest, greatest, mean;
+    total = sum(distances);
+    smallest = min_val(distances);
+    greatest = max_val(distances);
+    mean = mean_val(distances);
+    std::cout<<std::fixed<<setprecision(2)<<total<<endl
+            <<smallest<<endl
+            <<greatest<<endl
+            <<mean<<endl;
+}
+ 
+Q5:
+
+// r = a - b * floor(a/b);
+double remainder_val(double& a, double& b) 
+{
+    double r;
+    r = a - b * floor(a/b);
+
+    return r;
+}
+
+int main()
+{
+    double xval1, xval2;
+    char operation;
+    cout<<"Enter an operation in standard format: ";
+    while(cin>>xval1>>operation>>xval2)
+    {
+        switch(operation) 
+        {
+            case '+':
+                cout<<"The sum of "<<xval1<<" and "<<xval2<<" is "<<xval1+xval2;
+             case '-':
+                cout<<"The difference of "<<xval1<<" and "<<xval2<<" is "<<xval1-xval2;
+             case '*':
+                cout<<"The product of "<<xval1<<" and "<<xval2<<" is "<<xval1*xval2;
+             case '/':
+                cout<<"The quotient of "<<xval1<<" and "<<xval2<<" is ";if(xval2 == 0) cout<<"NaN. Division by 0."; else xval1/xval2;
+             case '%':
+                cout<<"The remainder of "<<xval1<<" in "<<xval2<<" is "<<remainder_val(xval1, xval2);
+        }
+
+        cout<<endl;
+        cout<<"Enter another operation (or CTRL+Z to exit): "<<endl;
+    }
+}
+
+Q6:
+
+int main()
+{
+    vector<string>xvals = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
+    string input;
+    cout<<"Enter any integer from 0-9 as either a string or an int:"<<endl;
+    while(cin>>input) 
+    {
+        bool is_digit = true;
+        for(char c : input) 
+        {
+            if(!isdigit(c)) is_digit = false; 
+        }
+        if(is_digit) 
+        {
+            int x = stoi(input);
+            if(x <= xvals.size()) 
+            {
+                cout<<xvals[x]<<" "<<endl;
+            }
+            else cout<<"Invalid input domain."<<endl;            
+        }
+        else 
+        {
+            bool found = false;
+            for(size_t i = 0;i < xvals.size();++i) 
+            {
+                if(input == xvals[i]) 
+                {
+                    cout<<i<<endl;
+                    found = true;
+                    break;
+                }
+            }
+            if(!found) cout<<"Invalid input domain."<<endl; 
+        };
+        cout<<"Enter another (or CTRL+Z) to exit: ";
+    }
+}
+
+Q7:
+
+
+int main()
+{
+    vector<string>xvals = {"zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine"};
+    string xval1, xval2;
+    int val1, val2;
+    char operation;
+    //
+    cout<<"Enter any operation in standard form (inputs are vals from 0-9 in int or string): "<<endl;
+    while(cin>>xval1>>operation>>xval2) 
+    {
+        bool is_digit1 = true, is_digit2 = true;
+        for(char c : xval1) 
+        {
+            if(!isdigit(c)) is_digit1 = false;
+        }
+        for(char c : xval2) 
+        {
+            if(!isdigit(c)) is_digit2 = false;
+        }
+        //
+        if(is_digit1 && is_digit2) 
+        {
+             val1 = stoi(xval1);val2 = stoi(xval2);
+             if(val1 < 0 || val1 >= xvals.size() || val2 < 0 || val2 >= xvals.size()) 
+             {
+                cout<<"Invalid input domain."<<endl;
+                cout<<"Enter another (or CTRL+Z to exit): "<<endl;
+                continue;
+            }
+        }
+        else
+        {
+            val1 = -1, val2 = -1;
+            for(size_t i = 0;i < xvals.size();++i) 
+            {
+                if(xval1 == xvals[i]) val1 = i;
+                if(xval2 == xvals[i]) val2 = i;
+                
+                if(val1 != -1 && val2 != -1) break;
+            }
+            if(val1 == -1 || val2 == -1) 
+            {
+                cout<<"Invalid input domain."<<endl;
+                cout<<"Enter another (or CTRL+Z to exit): "<<endl;
+                continue;
+            }
+        }
+        switch(operation) 
+        {
+            case '+':
+                cout<<"The sum of "<<val1<<" and "<<val2<<" is "<<val1+val2<<endl;break;
+            case '-':
+                cout<<"The difference of "<<val1<<" and "<<val2<<" is "<<val1-val2<<endl;break;
+            case '*':
+                cout<<"The product of "<<val1<<" and "<<val2<<" is "<<val1*val2<<endl;break;
+            case '/':
+                cout<<"The quotient of "<<val1<<" and "<<val2<<" is ";
+                    if(val2 == 0) cout<<"NaN. Division by zero."<<endl;
+                    else cout<<val1/val2<<endl;
+                    break;
+            case '%':
+                cout<<"The remainder of "<<val1<<" and "<<val2<<" is ";
+                    if(val2 == 0) cout<<"NaN. Mod by zero."<<endl;
+                    else cout<<val1%val2<<endl;
+                    break;
+            default:
+                cout<<"Invalid operator."<<endl;
+        }
+        cout<<"Enter another (or CTRL+Z to exit): "<<endl;
+    }
+}
+
+Q8:
+*/
