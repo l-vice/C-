@@ -657,7 +657,7 @@ int main()
     }
     //
 }
-
+/////////
 string to_lowercase(string x)
 {
     transform(x.begin(), x.end(), x.begin(),
@@ -1687,5 +1687,262 @@ int main()
     }
 }
 
-Q8:
+Q8-Q9:
+
+// Option 1 (OK):
+unsigned long long mmplier (const int & x)
+{
+    unsigned long long result = 1ULL;
+    if(x == 1) return result;
+    else 
+    {
+        for(size_t i = 2;i <= x; ++i) 
+        {
+            result*=2ULL;
+        }
+    }
+    return result;
+}
+
+
+//Option 2 (Better):
+
+unsigned long long mmplier(const int& x)
+{
+    unsigned long long result = 1ULL;
+    if(x == 1) return result;
+    if(x == 2) {result = 2;return result;}
+    else if(x % 2 == 0) 
+    {
+        result = 2ULL;
+        for(size_t i = 3;i <= x;i+=2) 
+        {
+            result*=4ULL;
+        }
+    }
+    else if(x % 2 != 0)
+    {
+        for(size_t i = 3;i <= x;i+=2) 
+        {
+            result*=4ULL;
+        }
+    }
+    return result;
+}
+
+// Option 3 (Best):
+
+unsigned long long mmplier(const int& x) 
+{
+    unsigned long long result = 1;
+    if(x == 1) return result;
+    else
+    {
+        result = 1ULL << (x-1);
+    }
+    return result;
+}
+
+unsigned long long prev_squares(const int& squares) 
+{
+    unsigned long long result = 1;
+    for(size_t i = 2;i < squares;++i) 
+    {
+        result+=mmplier(i);
+    }
+    return result;
+}
+
+unsigned long long threshold_squares(const int& squares, const int& threshold) 
+{
+    unsigned long long sum = 0ULL;
+    int result = 0;
+    for(size_t i = 1;i <= squares;++i) 
+    {
+        sum+=mmplier(i);
+        if(sum >= threshold) {result = i;break;}
+    }
+    return result;
+}
+
+int main()
+{
+    int squares = 64;
+    int threshold1 = 1000, threshold2 = 1000000, threshold3 = 1000000000;
+    int squares_th1, squares_th2, squares_th3;
+    //
+    unsigned long long grains_on_current_square, grains_on_previous_squares; 
+    //
+    grains_on_current_square = mmplier(squares);
+    grains_on_previous_squares = prev_squares(squares);
+    squares_th1 = threshold_squares(squares, threshold1);
+    squares_th2 = threshold_squares(squares, threshold2);
+    squares_th3 = threshold_squares(squares, threshold3);
+    // squares_th2 = threshold_squares(squares, threshold2);
+    // squares_th3 = threshold_squares(squares, threshold3); 
+    //
+    // OUTPUT
+    cout<<"The number of squares: "<<squares<<endl;
+    cout<<"The number of grains per suqare: ";
+        for(size_t i = 1;i <= squares; ++i) 
+        {
+            cout<<mmplier(i)<<" ";                       
+        }
+    cout<<endl;
+    cout<<"The number of grains on the current square: "<<grains_on_current_square<<endl;
+    cout<<"The number of grains on previous squares: "<<grains_on_previous_squares<<endl;
+    cout<<"The number of squares for each treshold: "<<endl
+        <<"Threshold 1: "<<squares_th1<<endl
+        <<"Threshold 2: "<<squares_th2<<endl
+        <<"Threshold 3: "<<squares_th3<<endl;
+}
+
+Q10:
+
+string randomizer() 
+{
+    vector<string>options = {"rock", "paper", "scissors"};
+    int random_pos = std::rand() % options.size();
+    
+    return options[random_pos];
+
+}
+
+string to_lowercase(string x)
+{
+    transform(x.begin(), x.end(), x.begin(),
+            [] (unsigned char c) {return tolower(c);});
+    return x;
+}
+
+int main()
+{
+    std::srand(std::time(0));
+    string input;
+    cout<<"Enter either rock, paper, or scissors: "<<endl;
+    size_t wins = 0, losses = 0, draws = 0;
+    double games = 0.0;
+    while(cin>>input) 
+    {
+        input = to_lowercase(input);
+        char input_char;
+        if(input == "rock" || input == "r") input_char = 'R';
+        else if(input == "paper" || input == "p") input_char = 'P';
+        else if(input == "scissors" || input == "s") input_char = 'S';
+        else {
+            cout<<"Invalid input string."<<endl;
+            cout<<"Enter another: (or CTRL+Z to exit):"<<endl;
+            continue;
+        }
+    //    
+        string computer = randomizer();
+        switch (input_char) 
+        {
+            case 'R':
+                if(computer == "scissors") {cout<<"You win!"<<endl;++wins;}
+                if(computer == "rock") {cout<<"Draw!"<<endl;++draws;}
+                if(computer == "paper") {cout<<"You lose!"<<endl;++losses;}
+                break;
+            case 'P':
+                if(computer == "rock") {cout<<"You win!"<<endl;++wins;}
+                if(computer == "paper") {cout<<"Draw!"<<endl;++draws;}
+                if(computer == "scissors") {cout<<"You lose!"<<endl;++losses;}
+                break;
+            case 'S':
+                if(computer == "paper") {cout<<"You win!"<<endl;++wins;}
+                if(computer == "scissors") {cout<<"Draw!"<<endl;++draws;}
+                if(computer == "rock") {cout<<"You lose!"<<endl;++losses;}
+                break; 
+        }
+        ++games;
+        cout<<"Enter another: (or CTRL+Z to exit): "<<endl;
+    }
+    double wr = (wins/games)*100;
+    cout<<"Overall Stats: "<<endl
+        <<"Wins: "<<wins<<endl
+        <<"Draws: "<<draws<<endl
+        <<"Losses: "<<losses<<endl;
+        std::cout<<std::fixed<<std::setprecision(2)<<"Winrate: "<<wr<<endl;
+}
+
+Q11-Q12:
+
+bool is_prime(const int& x, vector<int>primes)
+{
+    if(x == 1) return false;
+    for(size_t i = 2;i < x;++i) 
+    {
+        if(x % i == 0) return false;
+        if(i * i > x) break;
+    }
+    return true;    
+}
+
+int main()
+{
+    vector<int>primes;
+    int max = 0;
+    cout<<"Enter the maximum domain value of the prime alogrithm: "<<endl;
+    cin>>max;
+    for(size_t i = 1;i <= max;++i) if(is_prime(i, primes)) cout<<i<<" ";
+}
+
+Q13-Q14:
+
+void soe(const int& x)
+{
+    vector<char>A(x+1, true);
+    A[0] = A[1] = false;
+    for(size_t i = 2;i*i <= x;++i) 
+    {
+        if(A[i]) 
+        {
+            for(size_t j = i*i;j <= x;j+=i) 
+            {
+                A[j] = false;
+            }
+        }
+    }
+    //
+    for(size_t i = 2;i <= x;++i) if(A[i]) cout<<i<<" ";
+}
+
+
+int main()
+{
+    int max = 0;
+    cout<<"Enter the max domain for prime search using SOE Algo.: "<<endl;
+    cin>>max;
+    cout<<"The primes are: ";soe(max);
+}
+
+Q15: 
 */
+
+void soe(const int& n)
+{
+    int max = (n < 6) ? 15 : int(n * (log(n) + log(log(n))));
+    vector<char>A(max, true);
+    A[0] = A[1] = false;
+    for(size_t i = 2;i*i <= max; ++i) 
+    {
+        if(A[i]) 
+        {
+            for(size_t j = i*i;j <= max;j+=i) 
+            {
+                A[j] = false;    
+            }
+        }
+    }
+    //
+    vector<int>B;
+    for(size_t i = 2;i <= max;++i) 
+        if(A[i] && B.size() <= n) B.push_back(i);
+    for (auto i : B) cout<<i<<" ";   
+}
+
+int main()
+{
+    int n = 20;
+    cout<<"The first "<<n<<" primes are: "<<endl;soe(n);
+}
