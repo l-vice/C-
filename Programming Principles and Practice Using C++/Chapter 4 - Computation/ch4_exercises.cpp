@@ -237,7 +237,6 @@ int main()
 
 Q4: Not finished
 
-
 bool getBooleanInput(const string& question)
 {
     string answer;
@@ -1917,12 +1916,11 @@ int main()
 }
 
 Q15: 
-*/
 
 void soe(const int& n)
 {
     int max = (n < 6) ? 15 : int(n * (log(n) + log(log(n))));
-    vector<char>A(max, true);
+    vector<char>A(max+1, true);
     A[0] = A[1] = false;
     for(size_t i = 2;i*i <= max; ++i) 
     {
@@ -1935,14 +1933,276 @@ void soe(const int& n)
         }
     }
     //
-    vector<int>B;
+    int count = 0;
     for(size_t i = 2;i <= max;++i) 
-        if(A[i] && B.size() <= n) B.push_back(i);
-    for (auto i : B) cout<<i<<" ";   
+    {
+        if(A[i]) 
+        {
+            cout<<i<<" ";
+            ++count;
+        }
+        if(count == n) break;
+    }
 }
 
 int main()
 {
-    int n = 20;
+    int n = 50;
     cout<<"The first "<<n<<" primes are: "<<endl;soe(n);
 }
+
+Q16:
+
+int main()
+{
+    vector<int>sequence = {22, 37, 44, 46, 48, 55, 55, 55, 57, 58, 62, 64, 66, 69, 72, 76, 81, 84, 88, 91, 96, 100};
+    size_t max = 0, count = 0;
+    int temp, mode;
+    //
+    for(size_t i = 0;i < sequence.size();++i) 
+    {
+        temp = sequence[i];
+        count = 1;
+        for(size_t j = i+1;j < sequence.size();++j) 
+        {
+            if(sequence[j] == temp) 
+            {
+                ++count;
+            }
+        }
+        if(max < count) 
+        {
+            max = count;
+            mode = sequence[i];
+        }
+    }
+    cout<<"The mode is: "<<mode;
+}
+
+Q17 lexicographical: 
+
+string max_val(vector<string>& sequence) 
+{
+    string result;
+    result = *max_element(sequence.begin(), sequence.end());
+
+    return result;
+}
+
+string min_val(vector<string>& sequence) 
+{
+    string result;
+    result = *min_element(sequence.begin(), sequence.end());
+
+    return result;
+}
+
+string mode_val(const vector<string>& sequence) 
+{
+    unordered_map<string, size_t>freq;
+    string mode;
+    size_t max = 0;
+    for(const auto& s : sequence) 
+    {
+        size_t count = ++freq[s];
+        if(max < count) 
+        {
+            max = count;
+            mode = s;
+        }
+    }
+    return mode;
+}
+
+int main()
+{
+    vector<string> sequence = {"apple", "banana", "kiwi", "apple", "grape", "banana", "apple", "melon", "peach", "apple", "berry"};
+    string largest, smallest, mode;
+    //
+    largest = max_val(sequence);
+    smallest = min_val(sequence);
+    mode = mode_val(sequence);
+    cout<<"The smallest value is: "<<smallest<<'.'<<endl;
+    cout<<"The largest value is: "<<largest<<'.'<<endl;
+    cout<<"The mode is: "<<mode<<'.'<<endl;
+}
+
+Q18:
+
+// Quadratic formula: (-b +- sqrt(b^2 - 4*(a*c)))/2*a
+
+pair<double, double>quadratic_expr(const double& a, const double& b, const double& c) 
+{
+    if(a == 0) {throw invalid_argument("You don't need a quadratic formula if a = 0");}
+    pair<double, double>result = {0.0, 0.0};
+    double disc = (b*b) - 4*(a*c);
+    if(disc < 0) {throw domain_error("No real roots (discriminant < 0)");}
+    double x1 = (-b + sqrt(disc))/(2*a);
+    double x2 = (-b - sqrt(disc))/(2*a);
+    result = {x1, x2};
+    //
+    return result;
+}
+
+int main()
+{
+    pair<double, double>quad_res;
+    double a, b, c;
+    cout<<"Enter values for quadratic constants (a, b, c): "<<endl;
+    while(cin>>a>>b>>c) 
+    {
+        quad_res = quadratic_expr(a, b, c); 
+        cout<<"The result of the quadratic expression "<<a<<"x^2"<<" + "<<b<<"x"<<" + "<<c<<" is:"<<endl
+            <<"x1 = "<<quad_res.first<<" | "<<"x2 = "<<quad_res.second<<endl;
+        
+        cout<<"Enter another (or CTRL+Z to exit): "<<endl;
+    }
+}
+
+Q19:
+
+int main()
+{
+    string name;
+    int score;
+    vector<string>names;
+    vector<int>scores;
+    cout<<"Enter the results (to stop the input type 'No more'): "<<endl;
+    while(cin>>name>>score) 
+    {
+        for (string s : names) 
+        {
+            if(s == name) throw invalid_argument("Duplicate input.");
+        }
+        names.push_back(name);
+        scores.push_back(score);
+        //
+    }
+    // COUT
+    for(size_t i = 0;i < names.size();++i) 
+    {
+        cout<<names[i]<<" "<<scores[i]<<endl;
+    }
+}
+
+Q20:
+ 
+bool input_check(const string& s)
+{
+    if(s.empty()) return false;
+
+    for(char c : s) 
+    {
+        if(isdigit(c))
+            return false;
+    }
+    return true;
+}
+
+int main()
+{
+    string name;
+    int score;
+    vector<string>names;
+    vector<int>scores;
+    cout<<"Enter the results (to stop the input type 'No more'): "<<endl;
+    while(cin>>name>>score) 
+    {
+        for(string s : names) 
+        {
+            if(s == name)
+                throw invalid_argument("Duplicate input.");
+        }
+        //
+        names.push_back(name);
+        scores.push_back(score);
+    }
+    //
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    //
+    string record_search;
+    cout<<"Search records by name: "<<endl;
+    while(cin>>record_search) 
+    {
+        if(!input_check(record_search)) 
+        {
+            cout<<"Search by name: "<<endl;
+            continue;
+        }
+        cout<<"> ";
+        if(cin.eof()) {cout<<"Exiting program..."<<endl;break;}
+        //
+        bool found = false;
+        for(size_t i = 0;i < names.size();++i) 
+        {
+            if(record_search == names[i]) 
+            {
+                cout<<record_search<<" scored "<<scores[i]<<" points."<<endl;
+                found = true;
+                break;
+            }
+        }
+        if(!found) cout<<"name not found"<<endl;
+        cout<<"Search another (or CTRL+Z to exit): "<<endl;
+    }
+}
+
+
+Q21:
+int main()
+{
+    string name;
+    int score;
+    vector<string>names;
+    vector<int>scores;
+    cout<<"Enter the records (Use 'No more' to stop input): "<<endl;
+    while(cin>>name>>score) 
+    {
+        for(string s : names) 
+        {
+            if(s == name)
+                throw invalid_argument("Duplicate record.");
+        }
+
+        names.push_back(name);
+        scores.push_back(score);
+    }
+    //
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    //
+    int record_search;
+    cout<<"Search records by score: "<<endl;
+    while(true) 
+    {
+        cout<<"> ";
+        if(!(cin >> record_search)) 
+        {
+            if(cin.eof()) 
+            {
+                cout<<"Exiting program..."<<endl;
+                break;
+            }
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            cout<<"Invalid input. Search by score: (or CTRL+Z to exit): "<<endl;
+            continue;
+        }
+        bool found = false;
+        for(size_t i = 0;i < scores.size(); ++i) 
+        {
+            if(record_search == scores[i]) 
+            {
+                cout<<names[i]<<" scored "<<record_search<<" points."<<endl;
+                found = true;
+            }
+        }
+        if(!found) cout<<"score not found"<<endl;
+        cout<<"Search another (or CTRL+Z to exit): "<<endl;
+    }   
+}
+
+DONE! 
+*/
