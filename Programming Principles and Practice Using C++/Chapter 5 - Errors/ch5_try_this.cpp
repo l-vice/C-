@@ -277,7 +277,7 @@ int main()
         <<"Average temperature: "<<sum/temps.size()<<endl;   
 }
 
-TRY THIS 3:
+TRY THIS 4:
 // Least amount of input is 1;
 
 // Questions to ask yourself:
@@ -336,7 +336,7 @@ int main()
 }
 
 
-TRY THIS 4:
+TRY THIS 5:
 // The result was wrong. The correct result is 10.39 for s = 2cm;
 double hexagon_area(const double& s)
 { // use: calculate the area of a hexagon
@@ -358,7 +358,7 @@ int main()
     cout<<fixed<<setprecision(2)<<A<<"cm"endl;
 }
 
-TRY THIS 5:
+TRY THIS 6:
 // Estimation
 
 int main()
@@ -406,4 +406,59 @@ int area(const int& length, const int& width)
     return length*width;
 }
 
+
+class Surreal_temp{};
+
+const double highest_recorded_temp_F = 134.0;
+const double lowest_recorded_temp_F = -128.6; 
+
+int main()
+{
+    vector<double>temps;
+    double temp, sum = 0.0;
+    double highest_temp = highest_recorded_temp_F;
+    double lowest_temp = lowest_recorded_temp_F;
+    //
+    cout<<"Enter recorded temperatures in F: "<<endl;
+    try 
+    {
+        while(cin>>temp)
+            temps.push_back(temp);
+        
+        for(size_t i = 0; i < temps.size();++i) if(temps[i] > highest_recorded_temp_F || temps[i] < lowest_recorded_temp_F) throw Surreal_temp();
+        highest_temp = temps[0];lowest_temp = temps[0];
+        for(size_t i = 0;i < temps.size();++i)
+        {
+            if(temps[i] > highest_temp) highest_temp = temps[i];
+            if(temps[i] < lowest_temp) lowest_temp = temps[i];
+            sum+=temps[i];
+        }
+        
+        cout<<"Highest Temperature: "<<highest_temp<<endl
+            <<"Lowest Temperature: "<<lowest_temp<<endl
+            <<"Average Temperature: "<<sum/temps.size()<<endl;
+    }
+    catch(exception& e)
+    {
+        cerr<<"error: "<<e.what()<<endl;
+        keep_window_open();
+        return 1;
+    }
+    catch(Surreal_temp) 
+    {
+        cerr<<"The input value for temperature was not yet recorded on earth! If otherwise, please update the program."<<endl;
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        keep_window_open(); // check why this does not function as intended.
+        return 2;
+    }
+    catch(...)
+    {
+        cerr<<"Unknown exception!"<<endl;
+        keep_window_open();
+        return 3;
+    }
+}
+
+END!
 */
