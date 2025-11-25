@@ -333,7 +333,7 @@ pair<double, double> quad_form(const double& a, const double& b, const double& c
  // Pre-conditions: We need to make sure that we have all the requirements (a, b, c as double type objects). And that the discriminant is not zero and a =! 0.
  // Post-condition: Returns the values of x1 and x2 which are the quadratic roots provided that the discriminant is not zero!
     if(a == 0) 
-        throw domain_error("a = 0. You don't need a quadratic formula.");
+        throw domain_error("a  0. You don't need a quadratic formula.");
     double disc = (b*b) - 4*(a*c);
     if(disc < 0)
          throw domain_error("DISC < 0");
@@ -413,44 +413,264 @@ int main()
 }
 
 Q9:
-*/
 
-int summation(const int& sum_count, vector<int>& xvals)
+int summation(const int& sum_count, const vector<int>& xvals)
 {
-    if(sum_count > xvals.size())
-        throw range_error("The sum size is larger than the vector size.");
     int result = 0;
-    for(size_t i = 0;i < sum_count; ++i)
-        result+=xvals[i];
-
+    if(sum_count > xvals.size())
+        throw range_error("[std::range_error]: The sum count value is larger than the vector size.");
+    for(size_t i = 0;i < sum_count;++i)
+    {
+        if(xvals[i] > 0 && result > INT_MAX - xvals[i])
+            throw std::overflow_error("[std::overflow_error]: The result cannot be represented as an int.");
+        if(xvals[i] < 0 && result < INT_MIN - xvals[i])
+            throw std::overflow_error("[std::underflow_error]: The result cannot be represented as an int.");
+        result+=xvals[i];    
+    }
+        
     return result;
 }
+
+void print(const int& sum,const int& sum_count, const vector<int>& xvals)
+{
+    cout<<"The sum of the first "<<sum_count<<" numbers: ";
+    for(size_t i = 0;i < sum_count-1;++i) 
+        cout<<xvals[i]<<", ";
+    
+    cout<<"and "<<xvals[sum_count-1]<<" is "<<sum<<endl; 
+}
+
+void main_program()
+{
+    vector<int>xvals;
+    int xval, sum_count = 0,sum = 0;
+    cout<<"Please enter some numbers (press '|' at prompt to stop):"<<endl;
+    while(cin>>xval)
+        xvals.push_back(xval);
+    // 
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    //
+    cout<<"Please enter how many of the numbers you wish to sum, starting from the first: "<<endl;
+    while(cin>>sum_count)
+    {
+        sum = summation(sum_count, xvals);
+        print(sum, sum_count, xvals);
+        cout<<"Enter another (or CTRL+Z to exit): "<<endl;
+    }
+}
+
+int main()
+{
+    try
+    {   
+        main_program();
+    }
+    catch(const exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return 0;
+    }
+}
+
+Q10:
+
+double summation(const int& sum_count, const vector<double>& xvals)
+{
+    double result = 0;
+    if(sum_count > xvals.size())
+        throw std::range_error("[std::range_error]: The requested sum count value is larger than the vector size.");
+    for(size_t i = 0;i < sum_count;++i)
+    {
+        if(xvals[i] > 0 && result > numeric_limits<double>::max() - xvals[i])
+            throw std::overflow_error("[std::overflow_error]: The result cannot be expressed as a double.");
+        if(xvals[i] < 0 && result < numeric_limits<double>::min() - xvals[i])
+            throw std::underflow_error("[std::underflow_error]: The result cannot be expressed as a double.");
+        result+=xvals[i]; 
+    }
+    return result;
+}
+
+vector<double>adj_diff(const vector<double>& xvals)
+{
+    if(xvals.size() < 2)
+        throw std::range_error("[std::range_error]: The vector size is less than 2. Adjecent difference between vector values cannot be computed.");
+    vector<double>yvals;
+    int yvals_size = xvals.size()-1;
+    for(size_t i = 0;i < yvals_size;++i)
+    {
+        yvals.push_back(xvals[i] - xvals[i+1]);
+    }
+    return yvals;
+}
+
+void print(const double& sum, const int& sum_count, const vector<double>& xvals, const vector<double>& yvals)
+{
+    // SUM FOR Nth VECTOR INDICES
+    cout<<"The sum of the first "<<sum_count<<" numbers: ";
+    for(size_t i = 0;i <sum_count-1;++i) 
+        cout<<xvals[i]<<", ";
+    cout<<"and "<<xvals[sum_count-1]<<" is "<<sum<<'.'<<endl;
+    // ADJECENT DIFFERENCE INSIDE VECTOR X
+    cout<<"The difference between adjecent values inside the vector is: "; 
+    for(auto i : yvals) cout<<i<<" ";
+    cout<<endl;
+}
+
+void main_program()
+{
+    vector<double>xvals;
+    double xval, sum = 0.0;
+    int sum_count = 0;
+    cout<<"Enter some numbers (press '|' at prompt to stop): "<<endl;
+    while(cin>>xval) 
+        xvals.push_back(xval);
+    //
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    //
+    vector<double>yvals = adj_diff(xvals);
+    cout<<"Enter how many of the numbers you wish to sum, starting from the first: "<<endl;
+    while(cin>>sum_count)
+    {
+        sum = summation(sum_count, xvals);
+        print(sum, sum_count, xvals, yvals);
+        cout<<"Enter another (or CTRL+Z to exit): "<<endl;
+    }
+}
+
 int main()
 {
     try
     {
-        vector<int>xvals;
-        int xval = 0, sum_count = 0, sum = 0;
-        cout<<"Enter any number of ints: "<<endl;
-        while(cin>>xval)
-            xvals.push_back(xval);
-        //
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        cout<<"Enter the search range: "<<endl;
-        cin>>sum_count;
-        sum = summation(sum_count, xvals);
-        //
-        cout<<"The sum of the first "<<sum_count<<" numbers: ";
-            for(size_t i = 0;i < sum_count-1;++i) cout<<xvals[i]<<", ";
-            cout<<"and "<<xvals[sum_count-1]<<" is "<<sum;
+        main_program();
     }
-    catch(exception& e)
+    catch(const exception& e) 
     {
-        cerr<<"error: "<<e.what()<<endl;
+        cerr<<e.what()<<endl;
         keep_window_open();
-        return 1;
-        throw 
+        return 0;        
     }
 }
 
+Q11:
+// Fibonnaci Sequence can be described mathematically as follows: F(0) = 0, F(1) = 1; F(n) = f(n-1) + F(n-2) for n > 1
+
+void fibonnaci(const int& n)
+{
+    if(n < 2)
+        throw invalid_argument("[std::invalid_argument]: The function argument (n) must be sequential (n > 1).");
+    if(n > 47)
+        throw std::overflow_error("[std::overflow_error]: The result cannot be expressed as an int.");
+    int a=0, b=1, c;
+    cout<<a<<" "<<b<<" ";
+    for(size_t i = 2;i < n;++i)
+    {
+        c = a+b;
+        cout<<c<<" ";
+        a=b;
+        b=c;
+    }
+    cout<<endl;
+}
+
+void main_program()
+{
+    int n;
+    cout<<"Enter the n for Fibonacci sequence: "<<endl;
+    while(cin>>n)
+    {
+        fibonnaci(n);
+        cout<<"Enter another (or CTRL+Z to exit): "<<endl;
+    }
+}
+
+int main()
+{
+    try
+    {
+        main_program();
+    }
+    catch(const exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return 0;
+    }    
+}
+
+Q12:
+// Bullz and cowz
+// Program function:
+//  - Program stores a vector of 4 random ints from (0-9). ex. vector<int>VALUES = {1, 2, 8, 4}; 
+//  - User is supposed to guess all values in order. ex. user input 1248;
+//  - Score:
+//      ^ Bull: One bull is awarded if the user guesses both the value and the position of the integer correctly.
+//      ^ Cow: One cow is awarded if the user guesses only the value correctly and not the position. 
+//  -End: The guessing continues until the user has 4 bulls, meaning that he correctly guessed all four numbers.
+*/
+
+
+bool cows(const int& x,const vector<int>& A)
+{
+    int occurence = count(A.begin(), A.end(), x);
+    if(occurence > 0) 
+        return true;
+    //
+    return false;
+}
+
+int bulls(const vector<int>& A, const vector<int>& B)
+{
+    int result = 0;
+    for(size_t i = 0;i < A.size();++i)
+    {
+        if(B[i] == A[i]) ++result; 
+    }
+    //
+    return result;
+}
+
+void main_program()
+{
+    // A = vector storing the result; B = vector storing the guesses;
+    vector<int>A = {1, 4, 6, 8};
+    int x;
+    vector<int>B;
+    int cowz = 0, bullz = 0;
+    while(cin>>x)
+        B.push_back(x);
+    //
+    beginning:
+    bullz = bulls(A, B);
+    for(size_t i = 0;i < B.size();++i)
+    if(cows(B[i], A))
+    ++cowz;
+    if(bullz == A.size())
+    {
+        cout<<bullz<<" bull and "<<cowz<<" cow"<<endl;
+        cout<<"Congratz you win!"<<endl;
+    }
+    else
+    {
+        bullz = 0;
+        cowz = 0;
+        goto beginning;
+    }
+}
+
+int main()
+{
+    try
+    {
+        main_program();
+
+    }
+    catch(exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return 0;
+    }
+}
