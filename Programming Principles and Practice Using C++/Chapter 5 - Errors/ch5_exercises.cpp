@@ -1,5 +1,5 @@
 #include "std_lib_facilities.h"
-
+#include <random> // random number
 /*
 Q1:
 
@@ -609,16 +609,25 @@ Q12:
 //      ^ Bull: One bull is awarded if the user guesses both the value and the position of the integer correctly.
 //      ^ Cow: One cow is awarded if the user guesses only the value correctly and not the position. 
 //  -End: The guessing continues until the user has 4 bulls, meaning that he correctly guessed all four numbers.
-*/
 
-
-bool cows(const int& x,const vector<int>& A)
+int cows(vector<int>& A, vector<int>& B)
 {
-    int occurence = count(A.begin(), A.end(), x);
-    if(occurence > 0) 
-        return true;
-    //
-    return false;
+    int temp = 0, result = 0;
+    for(size_t i = 0;i < B.size();++i)
+    {
+        temp = B[i];
+        for(size_t j = 0;j < A.size();++j)
+        {
+            if(i == j) 
+                continue;
+            if(A[j] == B[i])
+            {
+                ++result;
+                break;
+            }
+        }    
+    }
+    return result;            
 }
 
 int bulls(const vector<int>& A, const vector<int>& B)
@@ -626,9 +635,42 @@ int bulls(const vector<int>& A, const vector<int>& B)
     int result = 0;
     for(size_t i = 0;i < A.size();++i)
     {
-        if(B[i] == A[i]) ++result; 
+        if(B[i] == A[i]) 
+            ++result; 
     }
     //
+    return result;
+}
+
+pair<int, int>parser(vector<int>& A, vector<int>& B)
+{
+    pair<int,int>result = {0, 0};
+    int cowz = 0, bullz = 0;
+    bullz = bulls(A, B); 
+    // Bulls
+    if(bullz == A.size()) 
+        return result = {bullz, cowz};
+    // Cows
+    cowz = cows(A, B);
+    // Return
+    result = {bullz, cowz};
+    return result;
+}
+
+int ctoi(const char c)
+{
+    int result = c - '0';
+    return result;
+}
+
+vector<int>read_input(const string& s)
+{
+    vector<int>result;
+    for(char c : s)
+        if(isdigit(c))
+        {
+            result.push_back(ctoi(c));
+        }
     return result;
 }
 
@@ -636,36 +678,34 @@ void main_program()
 {
     // A = vector storing the result; B = vector storing the guesses;
     vector<int>A = {1, 4, 6, 8};
-    int x;
+    string x;
     vector<int>B;
-    int cowz = 0, bullz = 0;
-    while(cin>>x)
-        B.push_back(x);
-    //
-    beginning:
-    bullz = bulls(A, B);
-    for(size_t i = 0;i < B.size();++i)
-    if(cows(B[i], A))
-    ++cowz;
-    if(bullz == A.size())
+    cout<<"Enter your guess:"<<endl;
+    pair<int, int>result;
+    while(cin>>x && x != "|")
     {
-        cout<<bullz<<" bull and "<<cowz<<" cow"<<endl;
-        cout<<"Congratz you win!"<<endl;
+        B = read_input(x);
+        //
+        result = parser(A, B);
+        if(result.first == A.size()) 
+        {
+            cout<<result.first<<" bull and "<<result.second<<" cow"<<endl;
+            cout<<"Congrats! You guessed the correct number: ";for(auto i : A) cout<<i;
+            break;
+        }
+        cout<<result.first<<" bull and "<<result.second<<" cow"<<endl;
+        //
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        cout<<"Enter another (or CTRL+Z to exit):"<<endl;    
     }
-    else
-    {
-        bullz = 0;
-        cowz = 0;
-        goto beginning;
-    }
-}
+} 
 
 int main()
 {
     try
     {
         main_program();
-
     }
     catch(exception& e)
     {
@@ -674,3 +714,492 @@ int main()
         return 0;
     }
 }
+
+Q13:
+// A = Vector storing the result.
+// B = Vector storing the guess.
+
+std::mt19937 rng; //Mersenne Twister generator
+
+void rng_seed(const long long int& seed)
+{
+    
+    rng.seed(seed);
+}
+
+long long int rand_int(const int& max)
+{
+    std::uniform_int_distribution<long long int> dist(0, max-1);
+    return dist(rng);
+}
+
+vector<int>randomizer(const int& size, const int& max, const int& seed)
+{
+    vector<int>result;
+    rng_seed(seed);
+    for(size_t i = 0;i < size;++i)
+    {
+        result.push_back(rand_int(max));
+    }
+    //
+    return result;
+}
+
+int ctoi(const char c)
+{
+    int result = c - '0';
+    return result;
+}
+
+vector<int>read_input(const string s)
+{
+    if(s.size() < 4 || s.size() > 4)
+        throw invalid_argument("[std::invalid_argument]: non-conforming input length.");
+    vector<int>result;
+    for(char c : s)
+    {
+        if(isdigit(c))
+            result.push_back(ctoi(c));
+        else
+            throw std::invalid_argument("[std::invalid_argument]: Input must be an integer.");
+    }
+    return result;
+}
+
+int count_bulls(const vector<int>& A, const vector<int>& B)
+{//
+    int result = 0;
+    for(size_t i = 0;i < A.size();++i)
+        if(B[i] == A[i])
+            ++result;
+    return result;
+}
+
+int count_cows(const vector<int>& A, const vector<int>& B)
+{// Use: This function computes how many values inside vector B are also inside vector A. This excludes vector values in the same position.
+ // Pre-condition: Vector's A and B must contain integers.
+ // Post-condition: The output is the amount of values form vector B that are repeated in vector A, excluding values in the same position.
+    int temp, result = 0;
+    vector<char>isBull(A.size(), false);
+    vector<char>matchedA(A.size(), false);
+    //
+    for(size_t i = 0;i < A.size();++i) 
+    {
+        if(B[i] == A[i])
+        {
+            isBull[i] = true;
+            matchedA[i] = true;
+        }
+    }
+    for(size_t i = 0;i < B.size();++i)
+    {
+        if(isBull[i])
+            continue;
+        temp = B[i];
+        for(size_t j = 0;j < A.size();++j)
+        {
+            if(i == j || matchedA[j])
+                continue;
+            if(temp == A[j])
+            {
+                ++result;
+                matchedA[j] = true;
+                break;
+            }
+            // Two issue with this code:
+                // 1. If there are repeated values inside B, the result will increase anyways. This will result in a wrong number of cows. 
+                // 2. The position will be accounted by the result since we do not specify to skip counting an exact match. The bulls can be counted as cows.
+        }
+    }
+    return result;
+}
+
+pair<int,int>parser(const vector<int>& A, const vector<int>& B)
+{// Use: This function computes the number of bulls and cows. Another special purpose is that it resets the number of bulls and cows at each input iteration.
+ // Pre-condition: Vector's storing the result and guess must be integers.
+ // Post-condition: Outputs a pair variable of type int representing the number of cows and bulls per each iteration.
+    int bulls = 0, cows = 0;
+    bulls = count_bulls(A, B);
+    if(bulls == A.size())
+        return {bulls, cows};
+    cows = count_cows(A, B); 
+    //
+    return {bulls, cows};
+}
+
+void main_program()
+{
+    // RESULT VECTOR [A]
+    int max = 10, size = 4;
+    long long int n;
+    cout<<"Enter seed: "<<endl;
+    cin>>n;    
+    vector<int>A = randomizer(size, max, n);
+    // GUESS VECTOR [B] 
+    string x;
+    vector<int>B;
+    // PROGRAM [C]
+    pair<int,int>result;
+    cout<<"Enter your guess:"<<endl;
+    while(cin>>x)
+    {
+        B = read_input(x);
+        //
+        result = parser(A, B);
+        cout<<result.first<<" bulls and "<<result.second<<" cows"<<endl;
+        //
+        if(result.first == A.size())
+        {
+            cout<<"You correctly guessed the sequence."<<endl;
+            return;
+        }
+        for(auto i : A) cout<<i<<" ";cout<<endl;
+        cout<<"Enter another: "<<endl;
+    }
+}
+
+int main()
+{
+    try
+    {
+        while(true)
+        {
+            main_program();
+            
+            cout<<"Play again? (y/n): ";
+            char c;
+            if(!(cin>>c)) 
+                break;
+            if(c == 'n' || c == 'N')
+                break;
+            // Clear
+            cin.clear();
+        }
+        
+    }
+    catch(const exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return 0;
+    }
+}
+
+// This is OK but i feel like its a little messy. There must exist better logic loops than this.
+// Let's redo this exercise again. However, this time, lets try to have a better output structure.
+
+// HELPER FUNCTIONS
+
+// RANDINT
+std::mt19937 rng;// Marsenne Twister
+
+void set_seed(const long long int& seed)
+{
+    rng.seed(seed);
+}
+
+int rand_int(const int& max)
+{
+    std::uniform_int_distribution<int>dist(0, max-1);
+    return dist(rng);
+}
+
+// ANSWER VECTOR [A]
+vector<int> randomizer(const long long int& seed, const int& size, const int& max)
+{
+    set_seed(seed);
+    vector<int>A;
+    for(size_t i = 0;i < size;++i)
+        A.push_back(rand_int(max));
+    
+    return A;
+}
+
+// GUESS VECTOR [B]
+
+vector<int>read_input(const string& x)
+{
+    vector<int>B;
+    for(char c : x)
+    {
+        if(!isdigit(c))
+            throw std::invalid_argument("[std::invalid_argument]: Guess sequence contains a non-integer value.");
+        int i = c - '0';
+        B.push_back(i);
+    }
+    return B;    
+}
+
+// PROCESS INPUT
+
+int count_bulls(const vector<int>& A, const vector<int>& B)
+{
+    int result = 0;
+    for(size_t i = 0;i < A.size();++i)
+    {
+        if(B[i] == A[i])
+            ++result;
+    }
+    return result;
+}
+
+int count_cows(const vector<int>& A, const vector<int>& B)
+{
+    int temp, result = 0;
+    vector<char>markedA(A.size(), false);
+    vector<char>isBull(A.size(), false);
+    for(size_t i = 0;i < A.size();++i)
+    {
+        if(B[i] == A[i])
+        {
+            isBull[i] = true;
+            markedA[i] = true; // we prevent using the same value for both outputs (bulls, cows)
+        }
+    }
+    for(size_t i = 0;i < B.size();++i)
+    {
+        if(isBull[i])
+            continue;
+        
+        temp = B[i];
+        for(size_t j = 0;j < A.size();++j)
+        {
+            if(i == j || markedA[j])
+                continue;
+            if(temp == A[j])
+            {
+                ++result;
+                markedA[j] = true;
+                break;
+            }
+        }
+    }
+    return result;
+    // two things dont work. 1 being the fact that the function increses the result by 1 each time for each value that was already matched.
+    // 2 being that the result increases for each value that is counted as a bull. Therefore, one value is counted twice, once as a bull and once as a cow.
+    // To fix this, we mark those values using a vector with T/F values and use continue to skip the count. 
+}
+
+pair<int, int>parser(const vector<int>& A, const vector<int>& B)
+{
+    if(B.size() > A.size())
+        throw invalid_argument("[std::invalid_argument]: The guess sequence is longer than the result.");
+    if(B.size() < A.size())
+        throw invalid_argument("[std::invalid_argument]: The guess sequence is shorter than the result.");
+    int bulls = 0, cows = 0;
+    bulls = count_bulls(A, B); if(bulls == A.size()) return {bulls, cows};
+    cows = count_cows(A, B);
+    //
+    return {bulls, cows};
+}
+
+/// MAIN STRUCTURE
+
+// SINGLE ROUND
+void play_one_game()
+{
+    int max = 10, size = 4;
+    long long int seed;
+    cout<<"Enter the seed as an integer."<<endl;
+    cin>>seed;
+    if(cin.fail())
+        throw std::invalid_argument("[std::invalid_argument]: Seed must be an integer.");
+    vector<int>A = randomizer(seed, size, max);
+    //
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    cout<<"Enter your guess (From 0-4, domain 0-9): "<<endl;
+    string guess = " ";
+    while(cin>>guess)
+    {
+        vector<int>B = read_input(guess);
+        pair<int, int>result = parser(A, B);
+        //
+        cout<<"Bulls: "<<result.first<<" | "<<"Cows: "<<result.second<<endl;
+        if(result.first == A.size()) 
+        {
+            cout<<"Congrats! You guessed the sequence A = [ ";for(auto i : A) cout<<i<<" ";cout<<"] correctly."<<endl;
+            return;
+        }
+        cout<<"Secret answer: ";for(auto i : A) cout<<i<<" ";cout<<endl;
+        cout<<"Enter another (or CTRL+Z to exit): "<<endl;
+    }
+}
+
+// GAME
+void game_loop()
+{
+    while(true)
+    {
+        play_one_game();
+        //
+        cout<<"Play another? (y/n):"<<endl;
+        char c;
+        cin>>c;
+        if(c == 'y' || c == 'Y') {}
+        else if(c == 'n' || c == 'N')
+        {
+            cout<<"Thanks for playing!"<<endl;
+            cout<<"Exiting game..."<<endl;
+            break;
+        }
+        else 
+            break;
+        cin.clear();
+    }
+}
+
+int main()
+{
+    try
+    {
+        game_loop();
+    }
+    catch(const exception& e)
+    {
+        cerr<<e.what()<<endl;
+        
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        keep_window_open();
+        return 0;
+    }
+}
+
+Q13 TAKE 3:
+*/
+/// STRUCTURE
+//  1. play_one_game
+//  2. game_loop
+//  3. main
+//  4. HELPERS
+
+
+// HELPERS [H]
+
+// RANDINT [R]
+
+std::mt19937 rng; // Mersenne Twister
+
+void set_seed(const long long int seed)
+{
+    rng.seed(seed);
+}
+
+int rand_int(const int& max)
+{
+    std::uniform_int_distribution<int>dist(0, max-1);
+    dist(rng);
+}
+
+// SOLUTION VECTOR [A] 
+vector<int>randomizer(const long long int& seed, const int& size, const int& max)
+{
+    vector<int>A;
+    for(size_t i = 0;i < size;++i)
+        A.push_back(rand_int(max));    
+}
+
+// GUESS VECTOR [B]
+
+vector<int>read_input(const string& x)
+{
+    vector<int>B;
+    for(char c : x)
+    {
+        int i = c - '0';
+        B.push_back(i);
+    }
+    return B;
+}
+
+// PARSER [P]
+
+pair<int, int>parser(const vector<int>& A, const vector<int>& B)
+{
+    int n = A.size();
+    int bulls = 0;
+    // 1. Count bulls
+    for(size_t i = 0;i < n;++i)
+        if(B[i] == A[i])
+            ++bulls;
+    // If all bulls no need to compute cows
+    if(bulls = n)
+        return {bulls, 0};
+    // 2. Frequency tables for digits 0-9
+    int freqA[10] = {0};
+    int freqB[10] = {0};
+    for(size_t i = 0;i < n;++i)
+    {
+        ++freqA[A[i]];
+        ++freqB[B[i]];
+    }
+    // 3. Total matches = sum of min(freqA[d], freqB[d])
+    int matches = 0;
+    for(size_t d = 0;d < 10;++d)
+        matches += std::min(freqA[d], freqB[d]);
+    // 4. Cows = total matches - bulls
+    int cows = matches - bulls;
+
+    return {bulls, cows};
+}
+
+// SINGLE GAME [SG]
+void play_one_game()
+{  
+    int max = 10, size = 4;
+    long long int seed;
+    cin>>seed;
+    vector<int>A = randomizer(seed, size, max);
+    //
+    cin.clear();
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    //
+    cout<<"Enter your guess: "<<endl;
+    string guess;
+    while(cin>>guess)
+    {
+        vector<int>B = read_input(guess);
+        //
+        pair<int, int>result = parser(A, B);
+    }
+} 
+
+// GAME LOOP [GL]
+void game_loop()
+{
+    play_one_game();
+    while(true) 
+    {
+        cout<<"Play another? (y/n)"<<endl;
+        char c;
+        cin>>c;
+        if(c == 'y' || c == 'Y') {}
+        else if(c == 'n' || c == 'N')
+        {
+            cout<<"Thanks for playing!"<<endl;
+            cout<<"Exiting game!"<<endl;
+            break;
+        }
+        else 
+            break;
+    }
+    
+}
+
+// MAIN [M]
+int main()
+{
+    try
+    {
+        game_loop();
+    }
+    catch(const exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return 0;
+    }
+}
+
