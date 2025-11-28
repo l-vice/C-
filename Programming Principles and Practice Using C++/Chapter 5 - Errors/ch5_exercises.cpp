@@ -1090,24 +1090,60 @@ void set_seed(const long long int seed)
 int rand_int(const int& max)
 {
     std::uniform_int_distribution<int>dist(0, max-1);
-    dist(rng);
+    return dist(rng);
+}
+
+// CHECK INPUT [C]
+
+string read(const string& x)
+{
+    for(char c : x)
+        if(!isdigit(c))
+            throw std::invalid_argument("[std::invalid_argument]: Seed must be a digit.");
+    return x;
+}
+
+// LL OVERFLOW [LO]
+
+long long int stoll_overflow(const string& s)
+{
+    try
+    {   
+        return stoll(s);        
+    }
+    catch(const std::out_of_range&)
+    {
+        if(!s.empty() && s[0] == '-')
+            throw std::underflow_error("[std::underflow_error]: The seed is too small to be represented as an integer.");
+        else
+            throw std::overflow_error("[std::overflow_error]: The seed is too big to be represented as an integer.");
+    }
 }
 
 // SOLUTION VECTOR [A] 
 vector<int>randomizer(const long long int& seed, const int& size, const int& max)
 {
+    set_seed(seed);
+
     vector<int>A;
     for(size_t i = 0;i < size;++i)
-        A.push_back(rand_int(max));    
+        A.push_back(rand_int(max));
+    return A;
 }
 
 // GUESS VECTOR [B]
 
 vector<int>read_input(const string& x)
 {
+    if(x.size() < 4)
+        throw std::invalid_argument("[std::invalid_argument]: The guess sequence is shorter than the answer.");
+    if(x.size() > 4)
+        throw std::invalid_argument("[std::invalid_argument]: The guess sequence is larger than the answer.");
     vector<int>B;
     for(char c : x)
     {
+        if(!isdigit(c))
+            throw std::invalid_argument("[std::invalid_argument]: Guess must be an integer.");
         int i = c - '0';
         B.push_back(i);
     }
@@ -1120,14 +1156,12 @@ pair<int, int>parser(const vector<int>& A, const vector<int>& B)
 {
     int n = A.size();
     int bulls = 0;
-    // 1. Count bulls
     for(size_t i = 0;i < n;++i)
         if(B[i] == A[i])
             ++bulls;
-    // If all bulls no need to compute cows
-    if(bulls = n)
+    if(bulls == n)
         return {bulls, 0};
-    // 2. Frequency tables for digits 0-9
+    //
     int freqA[10] = {0};
     int freqB[10] = {0};
     for(size_t i = 0;i < n;++i)
@@ -1135,57 +1169,78 @@ pair<int, int>parser(const vector<int>& A, const vector<int>& B)
         ++freqA[A[i]];
         ++freqB[B[i]];
     }
-    // 3. Total matches = sum of min(freqA[d], freqB[d])
     int matches = 0;
     for(size_t d = 0;d < 10;++d)
-        matches += std::min(freqA[d], freqB[d]);
-    // 4. Cows = total matches - bulls
+        matches+=std::min(freqA[d], freqB[d]);
     int cows = matches - bulls;
-
+    //
     return {bulls, cows};
 }
 
+
+
 // SINGLE GAME [SG]
-void play_one_game()
+bool play_one_game()
 {  
     int max = 10, size = 4;
-    long long int seed;
-    cin>>seed;
-    vector<int>A = randomizer(seed, size, max);
+    string seed;
+    long long int int_seed = 0LL;
     //
-    cin.clear();
+    cout<<"Set seed: ";
+    cin>>seed;
+    if(cin.eof()) return false;
+    seed = read(seed);
+    int_seed = stoll_overflow(seed);
+    
+    //
     cin.ignore(numeric_limits<streamsize>::max(), '\n');
     //
+    vector<int>A = randomizer(int_seed, size, max);
     cout<<"Enter your guess: "<<endl;
     string guess;
     while(cin>>guess)
     {
         vector<int>B = read_input(guess);
         //
-        pair<int, int>result = parser(A, B);
+        pair<int,int>result = parser(A, B);
+        cout<<result.first<<" bulls and "<<result.second<<" cows"<<endl;
+        if(result.first == A.size())
+        {
+            cout<<"Congrats! You guessed the sequence correctly!"<<endl;
+            return true;
+        }
+
+        cout<<"Enter another: "<<endl;
     }
+    if(cin.eof()) return false; // user pressed CTRL+Z inside guess loop.
+    
+    return true;
 } 
 
 // GAME LOOP [GL]
 void game_loop()
 {
-    play_one_game();
+    
     while(true) 
     {
+        bool finished = play_one_game();
+        if(!finished)
+        {
+            cout<<"\nExiting game... (EOF detected)\n";
+            break;
+        }
         cout<<"Play another? (y/n)"<<endl;
         char c;
         cin>>c;
         if(c == 'y' || c == 'Y') {}
         else if(c == 'n' || c == 'N')
         {
-            cout<<"Thanks for playing!"<<endl;
-            cout<<"Exiting game!"<<endl;
+            cout<<"Exiting game... Thanks for playing!"<<endl;
             break;
         }
         else 
             break;
     }
-    
 }
 
 // MAIN [M]
@@ -1202,4 +1257,5 @@ int main()
         return 0;
     }
 }
+
 
