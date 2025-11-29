@@ -1,5 +1,6 @@
 #include "std_lib_facilities.h"
 #include <random> // random number
+#include <unordered_set> //unordered set
 /*
 Q1:
 
@@ -1068,7 +1069,7 @@ int main()
 }
 
 Q13 TAKE 3:
-*/
+
 /// STRUCTURE
 //  1. play_one_game
 //  2. game_loop
@@ -1124,7 +1125,7 @@ long long int stoll_overflow(const string& s)
 vector<int>randomizer(const long long int& seed, const int& size, const int& max)
 {
     set_seed(seed);
-
+    //
     vector<int>A;
     for(size_t i = 0;i < size;++i)
         A.push_back(rand_int(max));
@@ -1178,7 +1179,6 @@ pair<int, int>parser(const vector<int>& A, const vector<int>& B)
 }
 
 
-
 // SINGLE GAME [SG]
 bool play_one_game()
 {  
@@ -1220,7 +1220,6 @@ bool play_one_game()
 // GAME LOOP [GL]
 void game_loop()
 {
-    
     while(true) 
     {
         bool finished = play_one_game();
@@ -1254,8 +1253,296 @@ int main()
     {
         cerr<<e.what()<<endl;
         keep_window_open();
+        return 1;
+    }
+}
+
+Q13 TAKE 4:
+Structure:
+//  1. play_one_game
+//  2. game_loop
+//  3. main
+//  4. helpers
+
+
+// ------------------------ HELPERS [H] ------------------------
+
+// RANDINT [R]
+
+std::mt19937 rng; // Mersenne Twister
+
+void set_seed(const int& n)
+{
+    rng.seed(n);
+}
+
+int rand_int(const int& max)
+{
+    std::uniform_int_distribution<int>dist(0, max-1);
+    return dist(rng);
+}
+
+// SEED [S]
+
+int read_seed(const string& s)
+{
+    if(s[0] == '-')
+        throw std::invalid_argument("[std::invalid_argument]: The seed must be a positive number.");
+    try
+    {
+        int result = stoi(s);
+        return result;
+    }
+    catch(const std::out_of_range)
+    {
+        throw std::overflow_error("[std::overflow_error]: The seed cannot be represented as an integer.");
+    }
+}
+
+// SOLUTION VECTOR [A]
+
+vector<int>randomiser(const int& seed, const int& size, const int& max)
+{
+    set_seed(seed);
+    
+    vector<int>A;
+    for(size_t i = 0;i < size;++i)
+        A.push_back(rand_int(max));
+        
+    return A;
+}
+
+// GUESS VECTOR [B]
+
+int ctoi(const char& c)
+{
+   int i = c - '0';
+   return i; 
+}
+
+vector<int>read_input(const string& s)
+{
+    if(s.size() > 4)
+        throw std::invalid_argument("[std::invalid_argument]: The guess sequence is larger than the solution.");
+    if(s.size() < 4)
+        throw std::invalid_argument("[std::invalid_argument]: The guess sequence is shorter than the solution.");
+    vector<int>B;
+    for(char c : s)
+        B.push_back(ctoi(c));
+    //
+    return B;
+}
+
+// PARSER [P]
+
+pair<int, int>parser(vector<int>& A, vector<int>& B)
+{
+    int n = A.size();
+    int bulls = 0;
+    //
+    for(size_t i = 0;i < n;++i)
+        if(B[i] == A[i])
+            ++bulls;
+    if(bulls == n)
+        return{bulls, 0};
+    //
+    int freqA[10] = {0};
+    int freqB[10] = {0};
+    for(size_t i = 0;i < n;++i)
+    {
+        ++freqA[A[i]];
+        ++freqB[B[i]];
+    }
+    //
+    int matches = 0;
+    for(size_t d = 0;d < 10;++d)
+        matches += std::min(freqA[d], freqB[d]);
+    int cows = matches - bulls;
+    //
+    return {bulls, cows};
+}
+
+// ------------------------ SINGLE GAME [SG] ------------------------
+bool play_one_game()
+{
+    int max = 10, size = 4;
+    cout<<"Enter seed:"<<endl;
+    string seed;
+    cin>>seed;
+    if(cin.eof())
+        return false;
+    int seed_int = read_seed(seed);
+    vector<int>A = randomiser(seed_int, size, max);
+    //
+    cin.ignore(numeric_limits<streamsize>::max(), '\n');
+    //
+    cout<<"Enter your guess: "<<endl;
+    string guess;
+    while(cin>>guess)
+    {
+        vector<int>B = read_input(guess);
+        pair<int,int>result = parser(A, B);
+        //
+        cout<<result.first<<" bulls and "<<result.second<<" cows."<<endl;
+        if(result.first == A.size())
+        {
+            cout<<"Congrats! You've guessed the sequence correctly."<<endl;
+            return true;
+        }
+    }
+    if(cin.eof())
+        return false;
+
+    return true;
+}
+
+// ------------------------ GAME LOOP [GL] ------------------------
+void game_loop()    
+{
+    try
+    {
+        while(true)
+        {
+            bool finished = play_one_game();
+            if(!finished) 
+            {
+                cout<<"Exiting game... (EOF Detected)\n";
+                break;
+            }
+            cout<<"Play another? (y/n):"<<endl;
+            char c;
+            cin>>c;
+            if(c == 'y' || c == 'Y') {}
+            else if(c == 'n' || c == 'N')
+            {
+                cout<<"Exiting game..."<<endl;
+                break; 
+            }
+            else
+                break;
+        }
+    }
+    catch(const std::invalid_argument& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(const std::out_of_range& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(const std::overflow_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+}
+
+// ------------------------ MAIN [M] ------------------------
+int main()
+{
+    try
+    {
+        game_loop();
+    }
+    catch(const exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
         return 0;
     }
 }
 
 
+//// TO USE LATER
+else if(dow.first == "Wednesday")
+                WE.push_back(dow.second);
+            else if(dow.first == "Thursday")
+                TH.push_back(dow.second);
+            else if(dow.first == "Friday")
+                FR.push_back(dow.second);
+            else if(dow.first == "Saturday")
+                TU.push_back(dow.second);
+////
+Q14:
+*/
+
+bool legal(const string& s)
+{
+    unordered_set<string>legal_values = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", 
+                                             "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
+                                             "Mon", "Tue", "Wed", "Thu", "Fri", "Fr", "Sat", "Sun",
+                                             "mon", "tue", "wed", "thu", "fri", "fr", "sat", "sun",};
+    int r = count(legal_values.begin(), legal_values.end(), s);
+    if(r > 0)
+        return true;
+    else
+        throw std::invalid_argument("[std::invalid_argument]: The input value is illegal.");
+    return false;
+}
+
+
+
+void main_program()
+{
+    try
+    {
+        pair<string, int>dow;
+        vector<int>MO, TU, WE, TH, FR, SA, SU;
+        int sum = 0;
+        cout<<"Enter the days of the week and their values: "<<endl;
+        // 
+        while(cin>>dow.first>>dow.second)
+        {
+            bool check = legal(dow.first);
+            if(dow.first == "Monday" || dow.first == "monday" || dow.first == "Mon" || dow.first == "mon")
+                MO.push_back(dow.second);
+            else if(dow.first == "Tuesday" || dow.first == "tuesday" || dow.first == "Tue" || dow.first == "tue")
+                TU.push_back(dow.second);
+            else if(dow.first == "Wednesday" || dow.first == "wednesday" || dow.first == "Wed" || dow.first == "wed")
+                WE.push_back(dow.second);
+            else if(dow.first == "Thursday" || dow.first == "thursday" || dow.first == "Thu" || dow.first == "thu")
+                TH.push_back(dow.second);
+            else if(dow.first == "Friday" || dow.first == "friday" || dow.first == "Fri" || dow.first == "fri" || dow.first == "Fr" || dow.first == "fr")
+                FR.push_back(dow.second);
+            else if(dow.first == "Saturday" || dow.first == "saturday" || dow.first == "Sat" || dow.first == "sat")
+                SA.push_back(dow.second);
+            else if(dow.first == "Sunday" || dow.first == "sunday" || dow.first == "Sun" || dow.first == "sun")
+                SU.push_back(dow.second);
+        }
+        
+        cout<<endl;
+        cout<<"The sum of weekly values: "<<sum;
+    }
+    catch(std::invalid_argument& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(std::out_of_range& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+
+}
+
+int main()
+{
+    try
+    {
+        main_program();
+    }
+    catch(const exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return 0;
+    }
+}
