@@ -1469,54 +1469,84 @@ else if(dow.first == "Wednesday")
                 TU.push_back(dow.second);
 ////
 Q14:
-*/
-
-bool legal(const string& s)
-{
-    unordered_set<string>legal_values = {"Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday", 
-                                             "monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday",
-                                             "Mon", "Tue", "Wed", "Thu", "Fri", "Fr", "Sat", "Sun",
-                                             "mon", "tue", "wed", "thu", "fri", "fr", "sat", "sun",};
-    int r = count(legal_values.begin(), legal_values.end(), s);
-    if(r > 0)
-        return true;
-    else
-        throw std::invalid_argument("[std::invalid_argument]: The input value is illegal.");
-    return false;
-}
-
-
 
 void main_program()
 {
     try
     {
-        pair<string, int>dow;
+        string day_of_the_week = " ";
+        int value = 0;
         vector<int>MO, TU, WE, TH, FR, SA, SU;
-        int sum = 0;
+        int sum_mo = 0, sum_tu = 0, sum_we = 0, sum_th = 0, sum_fr = 0, sum_sa = 0, sum_su = 0;
+        int sum_total = 0, sum_wrong = 0;
         cout<<"Enter the days of the week and their values: "<<endl;
-        // 
-        while(cin>>dow.first>>dow.second)
-        {
-            bool check = legal(dow.first);
-            if(dow.first == "Monday" || dow.first == "monday" || dow.first == "Mon" || dow.first == "mon")
-                MO.push_back(dow.second);
-            else if(dow.first == "Tuesday" || dow.first == "tuesday" || dow.first == "Tue" || dow.first == "tue")
-                TU.push_back(dow.second);
-            else if(dow.first == "Wednesday" || dow.first == "wednesday" || dow.first == "Wed" || dow.first == "wed")
-                WE.push_back(dow.second);
-            else if(dow.first == "Thursday" || dow.first == "thursday" || dow.first == "Thu" || dow.first == "thu")
-                TH.push_back(dow.second);
-            else if(dow.first == "Friday" || dow.first == "friday" || dow.first == "Fri" || dow.first == "fri" || dow.first == "Fr" || dow.first == "fr")
-                FR.push_back(dow.second);
-            else if(dow.first == "Saturday" || dow.first == "saturday" || dow.first == "Sat" || dow.first == "sat")
-                SA.push_back(dow.second);
-            else if(dow.first == "Sunday" || dow.first == "sunday" || dow.first == "Sun" || dow.first == "sun")
-                SU.push_back(dow.second);
+        //
+        int ill_count = 0;  
+        while(true) 
+        {   
+            if(!(cin>>day_of_the_week))
+                break;
+            if(day_of_the_week == "|")
+                break;
+            if(!(cin>>value))
+            {
+                cin.clear();
+                cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
+                throw std::invalid_argument("[std::invalid_argument]: The value must be an integer.");
+            }
+            if(day_of_the_week == "Monday" || day_of_the_week == "monday" || day_of_the_week == "Mon" || day_of_the_week == "mon")
+            {
+                MO.push_back(value);
+                sum_mo+=value;
+            }
+            else if(day_of_the_week == "Tuesday" || day_of_the_week == "tuesday" || day_of_the_week == "Tue" || day_of_the_week == "tue")
+            {
+                TU.push_back(value);
+                sum_tu+=value;
+            }
+            else if(day_of_the_week == "Wednesday" || day_of_the_week == "wednesday" || day_of_the_week == "Wed" || day_of_the_week == "wed")
+            {
+                WE.push_back(value);
+                sum_we+=value;
+            }
+            else if(day_of_the_week == "Thursday" || day_of_the_week == "thursday" || day_of_the_week == "Thu" || day_of_the_week == "thu")
+            {
+                TH.push_back(value);
+                sum_th+=value;
+            }
+            else if(day_of_the_week == "Friday" || day_of_the_week == "friday" || day_of_the_week == "Fri" || day_of_the_week == "fri" || day_of_the_week == "Fr" || day_of_the_week == "fr")
+            {
+                FR.push_back(value);
+                sum_fr+=value;
+            }
+            else if(day_of_the_week == "Saturday" || day_of_the_week == "saturday" || day_of_the_week == "Sat" || day_of_the_week == "sat")
+            {
+                SA.push_back(value);
+                sum_sa+=value;
+            }
+            else if(day_of_the_week == "Sunday" || day_of_the_week == "sunday" || day_of_the_week == "Sun" || day_of_the_week == "sun")
+            {
+                SU.push_back(value);
+                sum_su+=value;    
+            }
+            else 
+            {
+                ++ill_count;
+                sum_wrong+=value;
+            }
+            sum_total+=value;
         }
-        
-        cout<<endl;
-        cout<<"The sum of weekly values: "<<sum;
+        //
+        cout<<"The sum of the values of the seven day-of-the week vector: "<<endl
+            <<"[Monday] "<<sum_mo<<endl
+            <<"[Tuesday] "<<sum_tu<<endl
+            <<"[Wednesday] "<<sum_we<<endl
+            <<"[Thursday] "<<sum_th<<endl
+            <<"[Friday] "<<sum_fr<<endl
+            <<"[Saturday] "<<sum_sa<<endl
+            <<"[Sunday] "<<sum_su<<endl
+            <<"[Total] "<<sum_total-sum_wrong<<endl;
+        cout<<"The number of rejected values: "<<ill_count<<endl;
     }
     catch(std::invalid_argument& e)
     {
@@ -1529,6 +1559,81 @@ void main_program()
         cerr<<e.what()<<endl;
         keep_window_open();
         return;
+    }
+
+}
+
+int main()
+{
+    try
+    {
+        main_program();
+    }
+    catch(const exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return 0;
+    }
+}
+
+--------------------------------------------------------------------------------------------- EOC CH-5: TAKE 2 ---------------------------------------------------------------------------------------------
+Q2
+*/
+
+int mmplier(const int& x)
+{
+    int result = 1;
+    if(x == 1) 
+        return result;
+    for(size_t i = 2;i <= x;++i)
+        result*=2;
+        
+    return result;
+}
+
+int mmplier_v2(const int& x)
+{
+    int result = 1;
+    if(x == 1) return result;
+    if(x == 2) {result = 2;return result;}
+    //
+    if(x % 2 == 0)
+    {
+        result = 2;
+        for(size_t i = 3;i <= x;i+=2)
+            result*=4;
+    }
+    if(x % 2 != 0)
+    {
+        for(size_t i = 3;i <= x;i+=2)
+            result*=4;
+    }
+
+    return result;
+}
+
+
+int mmplier_v3(const int& x)
+{
+    int result = 1 << (x-1);
+    
+    return result;
+}
+
+void main_program()
+{
+    int x;
+    cout<<"Enter the number of tiles: "<<endl;
+    while(cin>>x)
+    {
+        cout<<"The number of tiles: ";
+        for(size_t i = 1;i <=x;++i) cout<<i<<" ";
+        cout<<endl;
+        cout<<"Grains per tile: ";
+        for(size_t i = 1;i <= x;++i) cout<<mmplier_v3(i)<<" ";
+        cout<<endl;
+        cout<<"Enter another (or CTRL+Z to exit): "<<endl;
     }
 
 }
