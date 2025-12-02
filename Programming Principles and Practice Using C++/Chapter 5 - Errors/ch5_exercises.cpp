@@ -1578,64 +1578,22 @@ int main()
 }
 
 --------------------------------------------------------------------------------------------- EOC CH-5: TAKE 2 ---------------------------------------------------------------------------------------------
-Q2
-*/
+Q14:
 
-int mmplier(const int& x)
-{
-    int result = 1;
-    if(x == 1) 
-        return result;
-    for(size_t i = 2;i <= x;++i)
-        result*=2;
-        
-    return result;
-}
-
-int mmplier_v2(const int& x)
-{
-    int result = 1;
-    if(x == 1) return result;
-    if(x == 2) {result = 2;return result;}
-    //
-    if(x % 2 == 0)
-    {
-        result = 2;
-        for(size_t i = 3;i <= x;i+=2)
-            result*=4;
-    }
-    if(x % 2 != 0)
-    {
-        for(size_t i = 3;i <= x;i+=2)
-            result*=4;
-    }
-
-    return result;
-}
-
-
-int mmplier_v3(const int& x)
-{
-    int result = 1 << (x-1);
-    
-    return result;
-}
+// This is the proper solution utilizing vector indices
 
 void main_program()
 {
-    int x;
-    cout<<"Enter the number of tiles: "<<endl;
-    while(cin>>x)
+    try
     {
-        cout<<"The number of tiles: ";
-        for(size_t i = 1;i <=x;++i) cout<<i<<" ";
-        cout<<endl;
-        cout<<"Grains per tile: ";
-        for(size_t i = 1;i <= x;++i) cout<<mmplier_v3(i)<<" ";
-        cout<<endl;
-        cout<<"Enter another (or CTRL+Z to exit): "<<endl;
-    }
 
+    }
+    catch(const std::invalid_argument& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
 }
 
 int main()
@@ -1649,5 +1607,274 @@ int main()
         cerr<<e.what()<<endl;
         keep_window_open();
         return 0;
+    }
+    catch(...)
+    {
+        cerr<<"Unknown error!"<<endl;
+        keep_window_open();
+        return 1;
+    }
+}
+
+*/
+
+
+/*
+int day_to_index(string s)
+{
+    // lowercase the string
+    for(char& c : s) 
+        c = tolower(c);
+    
+    if(s == "monday" || s == "mon") return 0;
+    if(s == "tuesday" || s == "tue") return 1;
+    if(s == "wednesday" || s == "wed") return 2;
+    if(s == "thursday" || s == "thu") return 3;
+    if(s == "friday" || s == "fri") return 4;
+    if(s == "saturday" || s == "sat") return 5;
+    if(s == "sunday" || s == "sun") return 6;
+    
+    return -1; // illegal day
+}
+
+
+void main_program()
+{
+    vector<vector<int>> days(7);  // one vector for each day
+    vector<string> names = {"Monday","Tuesday","Wednesday","Thursday","Friday","Saturday","Sunday"};
+
+    int rejected = 0;
+
+    cout << "Enter day-value pairs (type '|' to stop):\n";
+
+    while(true)
+    {
+        string day;
+        int value;
+
+        if(!(cin >> day)) break;
+        if(day == "|") break;
+
+        if(!(cin >> value)) {
+            cin.clear();
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+            throw invalid_argument("Value must be an integer.");
+        }
+
+        int index = day_to_index(day);
+        if(index == -1) {
+            ++rejected;
+        } else {
+            days[index].push_back(value);
+        }
+    }
+
+    cout << "\n--- Daily sums ---\n";
+
+    for(int i = 0; i < 7; ++i) {
+        int sum = 0;
+        for(int x : days[i]) sum += x;
+        cout << names[i] << ": " << sum << "\n";
+    }
+
+    cout << "Rejected values: " << rejected << "\n";
+}
+
+
+Q12-Q13:
+// You need to know the required structure of program
+// 0. Helper functions
+// 1. Single round
+// 2. Program
+// 3. Main 
+*/
+
+// HELPER FUNCTIONS [H]
+
+// RANDINT [R]
+std::mt19937 rng; // Mersenne Twister RNG;
+
+void set_seed(const unsigned long long& seed)
+{
+    rng.seed(seed);
+}
+
+int rand_int(const int& max)
+{
+    std::uniform_int_distribution<int>dist(0, max-1);
+    return dist(rng);
+}
+
+// SOLUTION VECTOR [A]
+
+vector<int>randomiser(const unsigned long long& seed, const int& size, const int& max)
+{
+    set_seed(seed);
+    
+    vector<int>result;
+    for(size_t i = 0;i < size;++i)
+        result.push_back(rand_int(max));
+    
+    return result;
+}
+
+// GUESS VECTOR [B]
+
+unsigned long long ctoull(const char& c)
+{
+    unsigned long long ull_int = c - '0';
+
+    return ull_int;
+}
+
+vector<int>read_input(const string& s)
+{
+    vector<int>B;
+    for(char c : s)
+        B.push_back(ctoull(c));
+    return B;
+}
+
+// SEED [S]
+unsigned long long read_seed(const string & s)
+{
+    try
+    {
+        if(s[0] == '-')
+            throw std::invalid_argument("[std::invalid_argument]: Seed must be positive.");
+        unsigned long long result = stoull(s);
+        return result;
+    }
+    catch(const std::out_of_range)
+    {
+        throw std::overflow_error("[std::overflow_error]: The value cannot be represented as an integer.");
+    }
+}
+
+// PARSER [P]
+
+pair<int,int>parser(const vector<int>& A, const vector<int>& B)
+{
+    int n = A.size();
+    int bulls = 0;
+    for(size_t i = 0;i<n;++i)
+        if(B[i] == A[i])
+            ++bulls;
+    if(bulls = n)
+        return {bulls, 0};
+    int freqA[10] = {0};
+    int freqB[10] = {0};
+    for(size_t i = 0;i < n;++i)
+    {
+        ++freqA[A[i]];
+        ++freqB[B[i]];
+    }
+    int matches = 0;
+    for(int d = 0;d < 10;++d)
+        matches += min(freqA[d], freqB[d]);
+    int cows = matches - bulls;
+
+    return {bulls, cows};
+}
+
+
+// SINGLE LOOP [SL]
+// A = solution vector; B = guess vector;
+
+bool play_one_game()
+{
+    int size = 4, max = 10; // integers from 0-9, and integer count of 4; ex.. A[4] = [1, 2, 3, 4];
+    string seed;
+    unsigned long long seed_ull = 0ULL;
+    cout<<"Enter seed: "<<endl;
+    
+    cin>>seed;
+    if(cin.eof())
+        return false;
+    seed_ull = read_seed(seed);
+    vector<int>A = randomiser(seed_ull, size, max);
+    //
+    cin.ignore(std::numeric_limits<streamsize>::max(), '\n'); 
+    //
+    cout<<"Enter your guess: "<<endl;
+    string guess;
+    while(cin>>guess)
+    {
+        vector<int>B = read_input(guess);
+        pair<int, int>result = parser(A, B);
+
+        if(result.first == A.size())
+            cout<<result.first<<" bulls and "<<result.second<<" cows"<<endl;
+            cout<<"Congrats! You guessed the sequence correctly!"<<endl;
+            return true;
+        cout<<result.first<<" bulls and "<<result.second<<" cows"<<endl;
+        cout<<"Enter another (or CTRL+Z to exit): "<<endl;
+    }
+    return true;
+}
+
+// GAME LOOP [GL]
+void game_loop()
+{
+    try
+    {
+        while(true)
+        {
+            bool isfinished = play_one_round();
+            if(!isfinished)
+            {
+                cout<<"Exiting game (EOF Detected)...\n";
+                break;
+            }   
+            cout<<"Play again? (y/n)"<<endl;
+            char c;
+            cin>>c;
+            if(c == 'y' || c == 'Y') {}
+            else if(c == 'n' || c == 'N')
+            {
+                cout<<"Exiting game..."<<endl;
+                break;
+            }
+            else
+                break;
+        }
+    }
+    catch(const std::invalid_argument& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(const std::range_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(const std::overflow_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+}
+
+int main()
+{
+    try
+    {
+        game_loop();
+    }
+    catch(const exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return 0;
+    }
+    catch(...)
+    {
+        cerr<<"Unknown error type!"<<endl;
+        keep_window_open();
+        return 1;
     }
 }
