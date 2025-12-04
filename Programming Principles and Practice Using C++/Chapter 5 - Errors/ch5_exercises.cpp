@@ -425,10 +425,10 @@ int summation(const int& sum_count, const vector<int>& xvals)
         if(xvals[i] > 0 && result > INT_MAX - xvals[i])
             throw std::overflow_error("[std::overflow_error]: The result cannot be represented as an int.");
         if(xvals[i] < 0 && result < INT_MIN - xvals[i])
-            throw std::overflow_error("[std::underflow_error]: The result cannot be represented as an int.");
+            throw std::underflow_error("[std::underflow_error]: The result cannot be represented as an int.");
         result+=xvals[i];    
     }
-        
+
     return result;
 }
 
@@ -1178,7 +1178,6 @@ pair<int, int>parser(const vector<int>& A, const vector<int>& B)
     return {bulls, cows};
 }
 
-
 // SINGLE GAME [SG]
 bool play_one_game()
 {  
@@ -1582,44 +1581,6 @@ Q14:
 
 // This is the proper solution utilizing vector indices
 
-void main_program()
-{
-    try
-    {
-
-    }
-    catch(const std::invalid_argument& e)
-    {
-        cerr<<e.what()<<endl;
-        keep_window_open();
-        return;
-    }
-}
-
-int main()
-{
-    try
-    {
-        main_program();
-    }
-    catch(const exception& e)
-    {
-        cerr<<e.what()<<endl;
-        keep_window_open();
-        return 0;
-    }
-    catch(...)
-    {
-        cerr<<"Unknown error!"<<endl;
-        keep_window_open();
-        return 1;
-    }
-}
-
-*/
-
-
-/*
 int day_to_index(string s)
 {
     // lowercase the string
@@ -1682,19 +1643,18 @@ void main_program()
 
 
 Q12-Q13:
-// You need to know the required structure of program
-// 0. Helper functions
-// 1. Single round
-// 2. Program
-// 3. Main 
-*/
 
-// HELPER FUNCTIONS [H]
+// CONSTANT VALUES [CST]
+int A_sz = 4;
+int max = 10;
 
-// RANDINT [R]
-std::mt19937 rng; // Mersenne Twister RNG;
+// HELPERS [H]
 
-void set_seed(const unsigned long long& seed)
+// RAND INT [R]
+
+std::mt19937 rng; // Mersenne Twister
+
+void set_seed(unsigned long long& seed)
 {
     rng.seed(seed);
 }
@@ -1705,141 +1665,167 @@ int rand_int(const int& max)
     return dist(rng);
 }
 
-// SOLUTION VECTOR [A]
+// RESPONSE VECTOR [A]
 
-vector<int>randomiser(const unsigned long long& seed, const int& size, const int& max)
+vector<int>randomiser(unsigned long long& seed, const int& max)
 {
     set_seed(seed);
+
+    vector<int>A;
+    for(size_t i = 0;i < A_sz;++i)
+        A.push_back(rand_int(max));
     
-    vector<int>result;
-    for(size_t i = 0;i < size;++i)
-        result.push_back(rand_int(max));
-    
-    return result;
+    return A;
 }
 
 // GUESS VECTOR [B]
 
-unsigned long long ctoull(const char& c)
+vector<int>read_input(string& s)
 {
-    unsigned long long ull_int = c - '0';
-
-    return ull_int;
-}
-
-vector<int>read_input(const string& s)
-{
+    if(s.size() < A_sz)
+        throw std::range_error("[std::range_error]: The guess sequence is shorter than the result.");
+    if(s.size() > A_sz)
+        throw std::range_error("[std::range_error]: The guess sequence is longer than the result.");
     vector<int>B;
-    for(char c : s)
-        B.push_back(ctoull(c));
+    for(char& c : s)
+    {
+        int integer = c - '0';
+        B.push_back(integer);
+    }
+    //
     return B;
-}
-
-// SEED [S]
-unsigned long long read_seed(const string & s)
-{
-    try
-    {
-        if(s[0] == '-')
-            throw std::invalid_argument("[std::invalid_argument]: Seed must be positive.");
-        unsigned long long result = stoull(s);
-        return result;
-    }
-    catch(const std::out_of_range)
-    {
-        throw std::overflow_error("[std::overflow_error]: The value cannot be represented as an integer.");
-    }
 }
 
 // PARSER [P]
 
-pair<int,int>parser(const vector<int>& A, const vector<int>& B)
+pair<int, int>parser(const vector<int>& A, const vector<int>& B, const int& max)
 {
     int n = A.size();
     int bulls = 0;
-    for(size_t i = 0;i<n;++i)
+    for(size_t i = 0;i < n;++i)
         if(B[i] == A[i])
             ++bulls;
-    if(bulls = n)
+    if(bulls == n)
         return {bulls, 0};
-    int freqA[10] = {0};
-    int freqB[10] = {0};
-    for(size_t i = 0;i < n;++i)
+    
+    int freqA[max] = {0};
+    int freqB[max] = {0};
+    for(int i = 0;i < n;++i)
     {
         ++freqA[A[i]];
         ++freqB[B[i]];
     }
     int matches = 0;
-    for(int d = 0;d < 10;++d)
-        matches += min(freqA[d], freqB[d]);
+    for(int d = 0;d < max;++d)
+        matches +=std::min(freqA[d], freqB[d]);
     int cows = matches - bulls;
 
-    return {bulls, cows};
+    return{bulls, cows};
 }
 
+// SEED [S]
 
-// SINGLE LOOP [SL]
-// A = solution vector; B = guess vector;
+unsigned long long read_seed(string& s)
+{
+    for(char& c : s)
+            if(!isdigit(c) && s[0] != '-')
+                throw std::invalid_argument("[std::invalid_argument]: Seed must be an integer.");
+    
+    if(s[0] == '-')
+        throw std::invalid_argument("[std::invalid_argument]: The seed must be a positive number.");
+    try 
+    {   
+        unsigned long long result = stoull(s);
+        return result;
 
+    }
+    catch(std::out_of_range& e)
+    {
+        throw std::overflow_error("[std::overflow_error]: The seed cannot be represented as an integer.");
+    }
+}
+
+// SINGLE GAME [SG]
 bool play_one_game()
 {
-    int size = 4, max = 10; // integers from 0-9, and integer count of 4; ex.. A[4] = [1, 2, 3, 4];
+    int A_sz = 4, max = 10;
     string seed;
-    unsigned long long seed_ull = 0ULL;
     cout<<"Enter seed: "<<endl;
-    
     cin>>seed;
     if(cin.eof())
         return false;
-    seed_ull = read_seed(seed);
-    vector<int>A = randomiser(seed_ull, size, max);
+    unsigned long long ull_seed = read_seed(seed);
+    
+
+    vector<int>A = randomiser(ull_seed, max);
+    
     //
-    cin.ignore(std::numeric_limits<streamsize>::max(), '\n'); 
-    //
-    cout<<"Enter your guess: "<<endl;
+    cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
+    // 
     string guess;
+    cout<<"Enter your guess: "<<endl;
     while(cin>>guess)
-    {
+    {   
         vector<int>B = read_input(guess);
-        pair<int, int>result = parser(A, B);
+        
+        pair<int, int>result = parser(A, B, max);
 
         if(result.first == A.size())
+        {
             cout<<result.first<<" bulls and "<<result.second<<" cows"<<endl;
-            cout<<"Congrats! You guessed the sequence correctly!"<<endl;
-            return true;
+            cout<<"Congrats you've guessed the sequence [A]: ";for(auto i : A) cout<<i<<" ";
+            break;
+        }
+        
         cout<<result.first<<" bulls and "<<result.second<<" cows"<<endl;
+
+        cout<<"[A] ";for(auto i : A) cout<<i<<" ";
+        cout<<endl;
+        cout<<"[B] ";for(auto i : B) cout<<i<<" ";
+        cout<<endl;
         cout<<"Enter another (or CTRL+Z to exit): "<<endl;
     }
+    if(cin.eof())
+        return false;
+    //
     return true;
 }
 
 // GAME LOOP [GL]
+
 void game_loop()
 {
     try
     {
         while(true)
         {
-            bool isfinished = play_one_round();
+            bool isfinished = play_one_game();
             if(!isfinished)
             {
-                cout<<"Exiting game (EOF Detected)...\n";
-                break;
-            }   
-            cout<<"Play again? (y/n)"<<endl;
-            char c;
-            cin>>c;
-            if(c == 'y' || c == 'Y') {}
-            else if(c == 'n' || c == 'N')
-            {
-                cout<<"Exiting game..."<<endl;
+                cout<<"Exiting program (EOF Detected)...\n";
                 break;
             }
-            else
+            cout<<"\nPlay another? (y/n)\n";
+            char c;
+            cin>>c;
+            if(c == 'Y' || c == 'y') {}
+            else if(c == 'N' || c == 'n')
+            {
+                cout<<"Exiting program...\n";
                 break;
+            }    
+            else 
+                cout<<"Invalid input.\n";
         }
+
     }
-    catch(const std::invalid_argument& e)
+    catch(const invalid_argument& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(const std::out_of_range& e)
     {
         cerr<<e.what()<<endl;
         keep_window_open();
@@ -1871,10 +1857,554 @@ int main()
         keep_window_open();
         return 0;
     }
-    catch(...)
+}
+
+Q11:
+
+void range_check(const int& n)
+{
+    if(n < 2)
+        throw std::invalid_argument("[std::invalid_argument]: n is too small to represent a sequence.");
+    if(n > 47)
+        throw std::overflow_error("[std::overflow_error]: Variable type does not support the sequence size.");
+}
+
+void fibonacci_sequence(const int& n)
+{  
+    size_t count = 0;    
+    int a = 0, b = 1, c;
+    cout<<a<<" "<<b<<" ";
+    while(count < n-2)
     {
-        cerr<<"Unknown error type!"<<endl;
+        c = a+b;
+        cout<<c<<" ";
+        a = b;
+        b = c;
+        ++count;
+    }
+}
+
+void main_program()
+{
+    try
+    {
+        int n;
+        cout<<"Enter the length of the Fibonacci Sequence: "<<endl;
+        while(cin>>n)
+        {
+            range_check(n);
+            cout<<"The Fibonacci Sequence for the n numbers: ";fibonacci_sequence(n);
+            cout<<"\nEnter another(or CTRL+Z to exit): "<<endl;
+        }
+    }
+    catch(const std::invalid_argument& e)
+    {
+        cerr<<e.what()<<endl;
         keep_window_open();
-        return 1;
+        return;
+    }
+    catch(const std::overflow_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+}
+
+int main()
+{
+    try
+    {
+        main_program();
+    }
+    catch(const exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return 0;
+    }
+}
+
+Q8-Q10:
+
+void print(const double& sum, const int& sum_count, const vector<double>& xvals, const vector<double>xvals_adj)
+{
+    cout<<"The sum of the first "<<sum_count<<" numbers: ";
+    for(size_t i = 0;i < sum_count-1;++i) cout<<xvals[i]<<", ";cout<<"and "<<xvals[sum_count-1]<<" is "<<sum;
+    //
+    cout<<"\nThe adjecent difference: ";for(auto i : xvals_adj) cout<<i<<" ";
+}
+
+double i_sum(const int& sum_count, const vector<double>& xvals)
+{
+    double result = 0;
+    if(sum_count > xvals.size())
+        throw range_error("[std::range_error]: The sum count value is larger than the vector size.");
+    for(size_t i = 0;i < sum_count;++i)
+    {
+        if(xvals[i] > 0 && result > std::numeric_limits<double>::max() - xvals[i])
+            throw std::overflow_error("[std::overflow_error]: The result cannot be represented as an int.");
+        if(xvals[i] < 0 && result < numeric_limits<double>::min() - xvals[i])
+            throw std::underflow_error("[std::underflow_error]: The result cannot be represented as an int.");
+        
+        result+=xvals[i];
+    }     
+    //
+    return result;
+}
+
+vector<double>adj_diff(vector<double>& xvals)
+{
+    vector<double>v_adj;
+    int n = xvals.size()-1;
+    for(size_t i = 0;i < n;++i)
+    {
+        v_adj.push_back(xvals[i] - xvals[i+1]);
+    }
+    return v_adj;
+}
+
+void main_program()
+{
+    try
+    {
+        double x;
+        vector<double>xvals;
+        cout<<"Enter a series of numbers (press '|' at prompt to stop): "<<endl;
+        while(true)
+        {
+            if(!(cin>>x))
+                break;
+            xvals.push_back(x);
+        }  
+        //
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        //
+        vector<double>xvals_adj = adj_diff(xvals);
+        //
+        double sum = 0;
+        int sum_count;
+        cout<<"Enter how many numbers you would like to sum, starting from the first: "<<endl;
+        while(cin>>sum_count)
+        {
+            sum = i_sum(sum_count, xvals);
+            print(sum, sum_count, xvals, xvals_adj);
+            cout<<"\nEnter another (or CTRL+Z to exit): "<<endl;
+        }
+    }
+    catch(const std::range_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(const std::overflow_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(const std::underflow_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+}
+//
+int main()
+{
+    try
+    {
+        main_program();
+    }
+    catch(const exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return 0;
+    }
+}
+
+*/
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////
+
+void print(const int& sum, const int& sum_count, const vector<long long>xvals)
+{
+    cout<<"The sum of the first "<<sum_count<<" numbers: ";
+    for(size_t i = 0;i < sum_count-1;++i) cout<<xvals[i]<<", ";cout<<"and "<<xvals[sum_count-1]<<" is "<<sum;
+}
+
+int i_sum(const int& sum_count, const vector<long long>& xvals)
+{
+    int result = 0;
+    if(sum_count > xvals.size())
+        throw range_error("[std::range_error]: The sum count value is larger than the vector size.");
+    for(size_t i = 0;i < sum_count;++i)
+    {
+        if(xvals[i] > 0 && result > LONG_LONG_MAX - xvals[i])
+            throw std::overflow_error("[std::overflow_error]: The result cannot be represented as an int.");
+        if(xvals[i] < 0 && result < LONG_LONG_MIN - xvals[i])
+            throw std::underflow_error("[std::underflow_error]: The result cannot be represented as an int.");
+        result+=xvals[i];    
+    }
+
+    return result;
+}
+
+bool isint(const string& s)
+{
+    if(s.empty()) return false;
+
+    size_t i = 0;
+    if(s[0] == '-' || s[0] == '+') i = 1;
+    for(;i < s.size();++i)
+        if(!isdigit(s[i])) 
+            return false;
+    
+    return true;
+}
+
+long long read_input(string& s)
+{
+    try
+    {
+        return stoll(s);
+    }
+    catch(const std::out_of_range& e)
+    {
+        if(s[0] == '-')
+        {   
+            cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
+            throw std::underflow_error("[std::underflow_error]: The value is too big to be represented as an integer.");
+        }    
+        else
+            throw std::overflow_error("[std::overflow_error]: The value is too small to be represented as an integer.");
+    }
+    catch(const std::invalid_argument& e)
+    {
+        throw std::invalid_argument("[std::invalid_argument]: Input must be an integer.");
+    }    
+}
+
+void main_program()
+{
+    try
+    {
+        string x;
+        vector<long long>xvals;
+        cout<<"Enter a series of numbers (press '|' at prompt to stop): "<<endl;
+        while(cin>>x)
+        {
+            
+            if(x == "|")
+                break;
+            if(!isint(x))
+            {
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                throw std::invalid_argument("[std::invalid_argument]: The input must be an integer.");
+            }
+            
+            long long ll_x = read_input(x);    
+            xvals.push_back(ll_x);
+        }
+        //
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        //
+        int sum = 0, sum_count;
+        cout<<"Enter how many numbers you would like to sum, starting from the first: "<<endl;
+        while(cin>>sum_count)
+        {
+            sum = i_sum(sum_count, xvals);
+            print(sum, sum_count, xvals);
+            cout<<"\nEnter another (or CTRL+Z to exit): "<<endl;
+        }         
+    }
+    catch(const std::range_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(const std::overflow_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(const std::underflow_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+}
+
+int main()
+{
+    try
+    {
+        main_program();
+    }
+    catch(const exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return 0;
+    }
+}
+
+void print(const int& sum, const int& sum_count, const vector<long long>xvals)
+{
+    cout<<"The sum of the first "<<sum_count<<" numbers: ";
+    for(size_t i = 0;i < sum_count-1;++i) cout<<xvals[i]<<", ";cout<<"and "<<xvals[sum_count-1]<<" is "<<sum;
+}
+
+int i_sum(const int& sum_count, const vector<long long>& xvals)
+{
+    int result = 0;
+    if(sum_count > xvals.size())
+        throw range_error("[std::range_error]: The sum count value is larger than the vector size.");
+    for(size_t i = 0;i < sum_count;++i)
+    {
+        if(xvals[i] > 0 && result > LONG_LONG_MAX - xvals[i])
+            throw std::overflow_error("[std::overflow_error]: The result cannot be represented as an int.");
+        if(xvals[i] < 0 && result < LONG_LONG_MIN - xvals[i])
+            throw std::underflow_error("[std::underflow_error]: The result cannot be represented as an int.");
+        result+=xvals[i];    
+    }
+
+    return result;
+}
+
+bool isint(const string& s)
+{
+    if(s.empty()) return false;
+
+    size_t i = 0;
+    if(s[0] == '-' || s[0] == '+') i = 1;
+    for(;i < s.size();++i)
+        if(!isdigit(s[i])) 
+            return false;
+    
+    return true;
+}
+
+long long read_input(string& s)
+{
+    try
+    {
+        return stoll(s);
+    }
+    catch(const std::out_of_range& e)
+    {
+        if(s[0] == '-')
+        {   
+            cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
+            throw std::underflow_error("[std::underflow_error]: The value is too big to be represented as an integer.");
+        }    
+        else
+            throw std::overflow_error("[std::overflow_error]: The value is too small to be represented as an integer.");
+    }
+    catch(const std::invalid_argument& e)
+    {
+        throw std::invalid_argument("[std::invalid_argument]: Input must be an integer.");
+    }    
+}
+
+void main_program()
+{
+    try
+    {
+        string x;
+        vector<long long>xvals;
+        cout<<"Enter a series of numbers (press '|' at prompt to stop): "<<endl;
+        while(cin>>x)
+        {
+            if(x == "|")
+                break;
+            if(!isint(x))
+            {
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                throw std::invalid_argument("[std::invalid_argument]: The input must be an integer.");
+            }
+            
+            long long ll_x = read_input(x);    
+            xvals.push_back(ll_x);
+        }
+        //
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        //
+        int sum = 0, sum_count;
+        cout<<"Enter how many numbers you would like to sum, starting from the first: "<<endl;
+        while(cin>>sum_count)
+        {
+            sum = i_sum(sum_count, xvals);
+            print(sum, sum_count, xvals);
+            cout<<"\nEnter another (or CTRL+Z to exit): "<<endl;
+        }         
+    }
+    catch(const std::range_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(const std::overflow_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(const std::underflow_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+}
+ 
+int main()
+{
+    try
+    {
+        main_program();
+    }
+    catch(const exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return 0;
+    }
+}
+
+//
+void print(const int& sum, const int& sum_count, const vector<long long>xvals)
+{
+    cout<<"The sum of the first "<<sum_count<<" numbers: ";
+    for(size_t i = 0;i < sum_count-1;++i) cout<<xvals[i]<<", ";cout<<"and "<<xvals[sum_count-1]<<" is "<<sum;
+}
+
+int i_sum(const int& sum_count, const vector<long long>& xvals)
+{
+    int result = 0;
+    if(sum_count > xvals.size())
+        throw range_error("[std::range_error]: The sum count value is larger than the vector size.");
+    for(size_t i = 0;i < sum_count;++i)
+    {
+        if(xvals[i] > 0 && result > LONG_LONG_MAX - xvals[i])
+            throw std::overflow_error("[std::overflow_error]: The result cannot be represented as an int.");
+        if(xvals[i] < 0 && result < LONG_LONG_MIN - xvals[i])
+            throw std::underflow_error("[std::underflow_error]: The result cannot be represented as an int.");
+        result+=xvals[i];    
+    }
+
+    return result;
+}
+
+bool isint(const string& s)
+{
+    if(s.empty()) return false;
+
+    size_t i = 0;
+    if(s[0] == '-' || s[0] == '+') i = 1;
+    for(;i < s.size();++i)
+        if(!isdigit(s[i])) 
+            return false;
+    
+    return true;
+}
+
+long long read_input(string& s)
+{
+    try
+    {
+        return stoll(s);
+    }
+    catch(const std::out_of_range& e)
+    {
+        if(s[0] == '-')
+        {   
+            cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
+            throw std::underflow_error("[std::underflow_error]: The value is too big to be represented as an integer.");
+        }    
+        else
+            throw std::overflow_error("[std::overflow_error]: The value is too small to be represented as an integer.");
+    }
+    catch(const std::invalid_argument& e)
+    {
+        throw std::invalid_argument("[std::invalid_argument]: Input must be an integer.");
+    }    
+}
+
+void main_program()
+{
+    try
+    {
+        string x;
+        vector<long long>xvals;
+        cout<<"Enter a series of numbers (press '|' at prompt to stop): "<<endl;
+        while(cin>>x)
+        {
+            if(x == "|")
+                break;
+            if(!isint(x))
+            {
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                throw std::invalid_argument("[std::invalid_argument]: The input must be an integer.");
+            }
+            
+            long long ll_x = read_input(x);    
+            xvals.push_back(ll_x);
+        }
+        //
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        //
+        int sum = 0, sum_count;
+        cout<<"Enter how many numbers you would like to sum, starting from the first: "<<endl;
+        while(cin>>sum_count)
+        {
+            sum = i_sum(sum_count, xvals);
+            print(sum, sum_count, xvals);
+            cout<<"\nEnter another (or CTRL+Z to exit): "<<endl;
+        }         
+    }
+    catch(const std::range_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(const std::overflow_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(const std::underflow_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+}
+
+int main()
+{
+    try
+    {
+        main_program();
+    }
+    catch(const exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return 0;
     }
 }
