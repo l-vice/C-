@@ -1925,7 +1925,134 @@ int main()
     }
 }
 
-Q8-Q10:
+Q8:
+
+void print(const int& sum, const int& sum_count, const vector<long long>xvals)
+{
+    cout<<"The sum of the first "<<sum_count<<" numbers: ";
+    for(size_t i = 0;i < sum_count-1;++i) cout<<xvals[i]<<", ";cout<<"and "<<xvals[sum_count-1]<<" is "<<sum;
+}
+
+int i_sum(const int& sum_count, const vector<long long>& xvals)
+{
+    int result = 0;
+    if(sum_count > xvals.size())
+        throw range_error("[std::range_error]: The sum count value is larger than the vector size.");
+    for(size_t i = 0;i < sum_count;++i)
+    {
+        if(xvals[i] > 0 && result > LONG_LONG_MAX - xvals[i])
+            throw std::overflow_error("[std::overflow_error]: The result cannot be represented as an int.");
+        if(xvals[i] < 0 && result < LONG_LONG_MIN - xvals[i])
+            throw std::underflow_error("[std::underflow_error]: The result cannot be represented as an int.");
+        result+=xvals[i];    
+    }
+
+    return result;
+}
+
+bool isint(const string& s)
+{
+    if(s.empty()) return false;
+
+    size_t i = 0;
+    if(s[0] == '-' || s[0] == '+') i = 1;
+    for(;i < s.size();++i)
+        if(!isdigit(s[i])) 
+            return false;
+    
+    return true;
+}
+
+long long read_input(string& s)
+{
+    try
+    {
+        return stoll(s);
+    }
+    catch(const std::out_of_range& e)
+    {
+        if(s[0] == '-')
+        {   
+            cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
+            throw std::underflow_error("[std::underflow_error]: The value is too big to be represented as an integer.");
+        }    
+        else
+            throw std::overflow_error("[std::overflow_error]: The value is too small to be represented as an integer.");
+    }
+    catch(const std::invalid_argument& e)
+    {
+        throw std::invalid_argument("[std::invalid_argument]: Input must be an integer.");
+    }    
+}
+
+void main_program()
+{
+    try
+    {
+        string x;
+        vector<long long>xvals;
+        cout<<"Enter a series of numbers (press '|' at prompt to stop): "<<endl;
+        while(cin>>x)
+        {
+            if(x == "|")
+                break;
+            if(!isint(x))
+            {
+                cin.ignore(numeric_limits<streamsize>::max(), '\n');
+                throw std::invalid_argument("[std::invalid_argument]: The input must be an integer.");
+            }
+            //
+            long long ll_x = read_input(x);    
+            xvals.push_back(ll_x);
+        }
+        //
+        cin.clear();
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+        //
+        int sum = 0, sum_count;
+        cout<<"Enter how many numbers you would like to sum, starting from the first: "<<endl;
+        while(cin>>sum_count)
+        {
+            sum = i_sum(sum_count, xvals);
+            print(sum, sum_count, xvals);
+            cout<<"\nEnter another (or CTRL+Z to exit): "<<endl;
+        }         
+    }
+    catch(const std::range_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(const std::overflow_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(const std::underflow_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+}
+ 
+int main()
+{
+    try
+    {
+        main_program();
+    }
+    catch(const exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return 0;
+    }
+}
+
+Q9-Q10:
 
 void print(const double& sum, const int& sum_count, const vector<double>& xvals, const vector<double>xvals_adj)
 {
@@ -2027,116 +2154,41 @@ int main()
     }
 }
 
-*/
-///////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////
+Q7:
 
-void print(const int& sum, const int& sum_count, const vector<long long>xvals)
+pair<double, double>quadratic_expr(const double& a, const double& b, const double& c)
 {
-    cout<<"The sum of the first "<<sum_count<<" numbers: ";
-    for(size_t i = 0;i < sum_count-1;++i) cout<<xvals[i]<<", ";cout<<"and "<<xvals[sum_count-1]<<" is "<<sum;
-}
-
-int i_sum(const int& sum_count, const vector<long long>& xvals)
-{
-    int result = 0;
-    if(sum_count > xvals.size())
-        throw range_error("[std::range_error]: The sum count value is larger than the vector size.");
-    for(size_t i = 0;i < sum_count;++i)
-    {
-        if(xvals[i] > 0 && result > LONG_LONG_MAX - xvals[i])
-            throw std::overflow_error("[std::overflow_error]: The result cannot be represented as an int.");
-        if(xvals[i] < 0 && result < LONG_LONG_MIN - xvals[i])
-            throw std::underflow_error("[std::underflow_error]: The result cannot be represented as an int.");
-        result+=xvals[i];    
-    }
-
-    return result;
-}
-
-bool isint(const string& s)
-{
-    if(s.empty()) return false;
-
-    size_t i = 0;
-    if(s[0] == '-' || s[0] == '+') i = 1;
-    for(;i < s.size();++i)
-        if(!isdigit(s[i])) 
-            return false;
-    
-    return true;
-}
-
-long long read_input(string& s)
-{
-    try
-    {
-        return stoll(s);
-    }
-    catch(const std::out_of_range& e)
-    {
-        if(s[0] == '-')
-        {   
-            cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
-            throw std::underflow_error("[std::underflow_error]: The value is too big to be represented as an integer.");
-        }    
-        else
-            throw std::overflow_error("[std::overflow_error]: The value is too small to be represented as an integer.");
-    }
-    catch(const std::invalid_argument& e)
-    {
-        throw std::invalid_argument("[std::invalid_argument]: Input must be an integer.");
-    }    
+    if(a == 0)
+        throw std::domain_error("[std::domain error]: The quadratic coefficient a is 0. If indeed true, you should not use the quadratic function!");
+    double disc = (b*b) - 4*(a*c);
+        if(disc < 0)
+            throw std::domain_error("[std::domain_error]: The discriminant is negative!");
+    double x1 = (-b + sqrt(disc))/(2*a);
+    double x2 = (-b - sqrt(disc))/(2*a);
+    //
+    return {x1, x2}; 
 }
 
 void main_program()
 {
     try
     {
-        string x;
-        vector<long long>xvals;
-        cout<<"Enter a series of numbers (press '|' at prompt to stop): "<<endl;
-        while(cin>>x)
+        double a, b, c;
+        cout<<"Enter the quadratic constants (a, b, c)\n";
+        while(cin>>a>>b>>c)
         {
-            
-            if(x == "|")
+            if(cin.eof())
                 break;
-            if(!isint(x))
-            {
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                throw std::invalid_argument("[std::invalid_argument]: The input must be an integer.");
-            }
+            pair<double, double>result = quadratic_expr(a, b, c);
+            double x1 = result.first;
+            double x2 = result.second;
+            cout<<"The quadratic function: "<<a<<"x^2"<<" + "<<b<<"x"<<" + "<<c<<endl;
+            cout<<"Has two solutions: "<<"x1 = "<<x1<<" | x2 = "<<x2<<endl;
             
-            long long ll_x = read_input(x);    
-            xvals.push_back(ll_x);
-        }
-        //
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        //
-        int sum = 0, sum_count;
-        cout<<"Enter how many numbers you would like to sum, starting from the first: "<<endl;
-        while(cin>>sum_count)
-        {
-            sum = i_sum(sum_count, xvals);
-            print(sum, sum_count, xvals);
             cout<<"\nEnter another (or CTRL+Z to exit): "<<endl;
-        }         
+        }
     }
-    catch(const std::range_error& e)
-    {
-        cerr<<e.what()<<endl;
-        keep_window_open();
-        return;
-    }
-    catch(const std::overflow_error& e)
-    {
-        cerr<<e.what()<<endl;
-        keep_window_open();
-        return;
-    }
-    catch(const std::underflow_error& e)
+    catch(const std::domain_error& e)
     {
         cerr<<e.what()<<endl;
         keep_window_open();
@@ -2156,238 +2208,56 @@ int main()
         keep_window_open();
         return 0;
     }
+
 }
 
-void print(const int& sum, const int& sum_count, const vector<long long>xvals)
-{
-    cout<<"The sum of the first "<<sum_count<<" numbers: ";
-    for(size_t i = 0;i < sum_count-1;++i) cout<<xvals[i]<<", ";cout<<"and "<<xvals[sum_count-1]<<" is "<<sum;
-}
+Q6: C TO K
+// F = (C * 1.8) + 32
+// C = (F - 32) / 1.8
 
-int i_sum(const int& sum_count, const vector<long long>& xvals)
-{
-    int result = 0;
-    if(sum_count > xvals.size())
-        throw range_error("[std::range_error]: The sum count value is larger than the vector size.");
-    for(size_t i = 0;i < sum_count;++i)
-    {
-        if(xvals[i] > 0 && result > LONG_LONG_MAX - xvals[i])
-            throw std::overflow_error("[std::overflow_error]: The result cannot be represented as an int.");
-        if(xvals[i] < 0 && result < LONG_LONG_MIN - xvals[i])
-            throw std::underflow_error("[std::underflow_error]: The result cannot be represented as an int.");
-        result+=xvals[i];    
-    }
-
-    return result;
-}
-
-bool isint(const string& s)
-{
-    if(s.empty()) return false;
-
-    size_t i = 0;
-    if(s[0] == '-' || s[0] == '+') i = 1;
-    for(;i < s.size();++i)
-        if(!isdigit(s[i])) 
-            return false;
-    
-    return true;
-}
-
-long long read_input(string& s)
-{
-    try
-    {
-        return stoll(s);
-    }
-    catch(const std::out_of_range& e)
-    {
-        if(s[0] == '-')
-        {   
-            cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
-            throw std::underflow_error("[std::underflow_error]: The value is too big to be represented as an integer.");
-        }    
-        else
-            throw std::overflow_error("[std::overflow_error]: The value is too small to be represented as an integer.");
-    }
-    catch(const std::invalid_argument& e)
-    {
-        throw std::invalid_argument("[std::invalid_argument]: Input must be an integer.");
-    }    
-}
-
-void main_program()
-{
-    try
-    {
-        string x;
-        vector<long long>xvals;
-        cout<<"Enter a series of numbers (press '|' at prompt to stop): "<<endl;
-        while(cin>>x)
-        {
-            if(x == "|")
-                break;
-            if(!isint(x))
-            {
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                throw std::invalid_argument("[std::invalid_argument]: The input must be an integer.");
-            }
-            
-            long long ll_x = read_input(x);    
-            xvals.push_back(ll_x);
-        }
-        //
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        //
-        int sum = 0, sum_count;
-        cout<<"Enter how many numbers you would like to sum, starting from the first: "<<endl;
-        while(cin>>sum_count)
-        {
-            sum = i_sum(sum_count, xvals);
-            print(sum, sum_count, xvals);
-            cout<<"\nEnter another (or CTRL+Z to exit): "<<endl;
-        }         
-    }
-    catch(const std::range_error& e)
-    {
-        cerr<<e.what()<<endl;
-        keep_window_open();
-        return;
-    }
-    catch(const std::overflow_error& e)
-    {
-        cerr<<e.what()<<endl;
-        keep_window_open();
-        return;
-    }
-    catch(const std::underflow_error& e)
-    {
-        cerr<<e.what()<<endl;
-        keep_window_open();
-        return;
-    }
-}
- 
-int main()
-{
-    try
-    {
-        main_program();
-    }
-    catch(const exception& e)
-    {
-        cerr<<e.what()<<endl;
-        keep_window_open();
-        return 0;
-    }
-}
-
+const double abs_zero_C = -273.15;
+const double abs_zero_F = -459.67;
 //
-void print(const int& sum, const int& sum_count, const vector<long long>xvals)
+double ftoc(const double& f)
 {
-    cout<<"The sum of the first "<<sum_count<<" numbers: ";
-    for(size_t i = 0;i < sum_count-1;++i) cout<<xvals[i]<<", ";cout<<"and "<<xvals[sum_count-1]<<" is "<<sum;
-}
-
-int i_sum(const int& sum_count, const vector<long long>& xvals)
-{
-    int result = 0;
-    if(sum_count > xvals.size())
-        throw range_error("[std::range_error]: The sum count value is larger than the vector size.");
-    for(size_t i = 0;i < sum_count;++i)
-    {
-        if(xvals[i] > 0 && result > LONG_LONG_MAX - xvals[i])
-            throw std::overflow_error("[std::overflow_error]: The result cannot be represented as an int.");
-        if(xvals[i] < 0 && result < LONG_LONG_MIN - xvals[i])
-            throw std::underflow_error("[std::underflow_error]: The result cannot be represented as an int.");
-        result+=xvals[i];    
-    }
-
-    return result;
-}
-
-bool isint(const string& s)
-{
-    if(s.empty()) return false;
-
-    size_t i = 0;
-    if(s[0] == '-' || s[0] == '+') i = 1;
-    for(;i < s.size();++i)
-        if(!isdigit(s[i])) 
-            return false;
+    if(f < abs_zero_F)
+        throw std::invalid_argument("[std::invalid_argument]: The value in Fahrenheit is below absolute zero! [-459.67]");
     
-    return true;
+    double c = (f - 32) / 1.8;
+
+    return c;
 }
 
-long long read_input(string& s)
+double ctof(const double& c)
 {
-    try
-    {
-        return stoll(s);
-    }
-    catch(const std::out_of_range& e)
-    {
-        if(s[0] == '-')
-        {   
-            cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
-            throw std::underflow_error("[std::underflow_error]: The value is too big to be represented as an integer.");
-        }    
-        else
-            throw std::overflow_error("[std::overflow_error]: The value is too small to be represented as an integer.");
-    }
-    catch(const std::invalid_argument& e)
-    {
-        throw std::invalid_argument("[std::invalid_argument]: Input must be an integer.");
-    }    
+    if(c < abs_zero_C)
+        throw std::invalid_argument("[std::invalid_argument]: The value in Celsius is below absolute zero! [-273.15]");
+    double f = (c * 1.8) + 32;
+
+    return f;
 }
 
 void main_program()
 {
     try
     {
-        string x;
-        vector<long long>xvals;
-        cout<<"Enter a series of numbers (press '|' at prompt to stop): "<<endl;
-        while(cin>>x)
+        pair<double, char> x = {0.0, 'f'};
+        cout<<"Enter the value followed by the unit (ex. 10 C)\n";
+        
+        while(cin>>x.first>>x.second)
         {
-            if(x == "|")
-                break;
-            if(!isint(x))
+            x.second = tolower(x.second);
+            switch(x.second)
             {
-                cin.ignore(numeric_limits<streamsize>::max(), '\n');
-                throw std::invalid_argument("[std::invalid_argument]: The input must be an integer.");
+                case 'c':
+                    cout<<x.first<<" Celsius is "<<ctof(x.first)<<" Fahrenheit."<<endl;
+                    break;
+                case 'f':
+                    cout<<x.first<<" Fahrenheit is "<<ftoc(x.first)<<" Celsius."<<endl;
             }
-            
-            long long ll_x = read_input(x);    
-            xvals.push_back(ll_x);
         }
-        //
-        cin.clear();
-        cin.ignore(numeric_limits<streamsize>::max(), '\n');
-        //
-        int sum = 0, sum_count;
-        cout<<"Enter how many numbers you would like to sum, starting from the first: "<<endl;
-        while(cin>>sum_count)
-        {
-            sum = i_sum(sum_count, xvals);
-            print(sum, sum_count, xvals);
-            cout<<"\nEnter another (or CTRL+Z to exit): "<<endl;
-        }         
     }
-    catch(const std::range_error& e)
-    {
-        cerr<<e.what()<<endl;
-        keep_window_open();
-        return;
-    }
-    catch(const std::overflow_error& e)
-    {
-        cerr<<e.what()<<endl;
-        keep_window_open();
-        return;
-    }
-    catch(const std::underflow_error& e)
+    catch(const std::invalid_argument& e)
     {
         cerr<<e.what()<<endl;
         keep_window_open();
@@ -2408,3 +2278,71 @@ int main()
         return 0;
     }
 }
+
+Q2-Q5
+*/
+
+const double abs_zero_C = -273.15;
+const double abs_zero_K = 0;
+
+double ctok(double& c)
+{
+    if(c < abs_zero_C)
+        throw std::invalid_argument("[std::invalid_argument]: The temperature in Celsius is less than absolute zero.");
+    double k = c + 273.15;
+    return k;
+}
+
+double ktoc(double& k)
+{
+    if(k < abs_zero_K)
+        throw std::invalid_argument("[std::invalid_argument]: The temperature in Kelvin is less than absolute zero.");
+    double c = k - 273.15;
+
+    return c;
+}
+
+void main_program()
+{
+    try
+    {   
+        pair<double, char>x;
+        cout<<"Enter the temperature in either Kelvin or Celsius (ex. 20 C): "<<endl;
+        while(cin>>x.first>>x.second)
+        {
+            x.second = tolower(x.second);
+            switch(x.second) 
+            {
+                case 'c':
+                    cout<<"The temperature in Kelvin is: "<<ctok(x.first)<<endl;
+                    break;
+                case 'k':
+                    cout<<"The temperature in Celsius is: "<<ktoc(x.first)<<endl;
+                    break;
+            }
+
+            cout<<"Enter another (or CTRL+Z to exit): "<<endl;
+        }
+    }
+    catch(const std::invalid_argument& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+}
+
+int main()
+{
+    try
+    {
+        main_program();
+    }
+    catch(const exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return 0;
+    }
+}
+
