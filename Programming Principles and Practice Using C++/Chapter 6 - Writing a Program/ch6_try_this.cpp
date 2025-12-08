@@ -33,8 +33,15 @@ void read_token()
     //
 }
 
+
 TRY THIS 2:
 
+// Forward declaration of functions
+double expression();
+double term();
+double primary();
+
+// Token and Token_stream [T]
 class Token
 {
     public:
@@ -69,7 +76,7 @@ Token_stream::Token_stream()
 
 void Token_stream::putback(Token t)
 {
-    if(full = true) // if buffer is full then don't put back the token
+    if(full) // if buffer is full then don't put back the token
         throw std::logic_error("[std::logic_error]: putback() on a full buffer.");
     buffer = t;
     full = true;  
@@ -109,7 +116,6 @@ Token Token_stream::get()
 
 // TS CALL [TS]
 Token_stream ts;
-
 
 // 1. EXPRESSION [EXP]
 
@@ -151,12 +157,14 @@ double term()
             case '*':
                 left*=primary();
                 t = ts.get();
+                break;
             case '/':
             {
                 double d = primary();
                 if(d == 0) throw std::domain_error("[std::domain_eror]: Division by 0.");
                 left/=d;
                 t = ts.get();
+                break;
             }
             default:
                 ts.putback(t); //put back t into the token stream.
@@ -170,7 +178,6 @@ double term()
 double primary()
 {
     Token t = ts.get();
-    while(true)
     switch(t.kind)
     {
         case '(':
@@ -191,6 +198,7 @@ double primary()
     }
 }
 
+// CALCULATOR [C]
 void calculator()
 {
     try
@@ -204,7 +212,7 @@ void calculator()
                 break;
             if(t.kind == ';')
             {
-                cout<<expression()<<endl;
+                cout<<val<<endl;
             }
             else
                 ts.putback(t);
@@ -240,62 +248,237 @@ int main()
     }
 }
 
+TRY THIS 2 TAKE 2
 */
 
-// Sieve of Erathosthenes
+// function declaration [DEC]
 
-void soe(const int& x)
+double expression();
+double term();
+double primary();
+
+// Tokenization
+
+class Token
 {
-    vector<int>A(x+1, true);
-    A[0] = A[1] = false;
-    for(size_t i = 2;i*i <= x;++i)
-    {
-        if(A[i])
-            for(size_t j = i*i;j <= x;j+=i)
-                A[j] = false;
-    }
-    // COUT
-    cout<<"The primes are: ";for(size_t i = 0;i <= x;++i) if(A[i]) cout<<i<<" ";
+    public:
+        char kind;
+        double value;
+        Token(char ch)
+            :kind(ch), value(0) {}
+        Token(char ch, double val)
+            :kind(ch), value(val) {}
+};
+
+class Token_stream
+{
+    public:
+        Token_stream();
+        Token get();
+        void putback(Token t);
+    private:
+        bool full;
+        Token buffer;
+};
+
+// 1. Constructor
+
+Token_stream::Token_stream()
+    :full(false), buffer(0) {}
+
+// 2. putback()
+
+void Token_stream::putback(Token t)
+{
+    if(full)
+        throw std::invalid_argument("[std::invalid_argument]: putback() on a full buffer");
+    buffer = t;
+    full = true;
 }
 
-void fibonacci(const int& x)
+// 3. get()
+
+Token Token_stream::get()
 {
-    int a = 0, b = 1, c = 0;
-    cout<<a<<" "<<b<<" ";
-    while(c < x)
+    if(full)
+    {// if there is a token in the buffer, empty the buffer
+        full = false;
+        return buffer;
+    }
+
+    char ch;
+    cin>>ch;
+
+    switch(ch)
     {
-        c = a+b;
-        cout<<c<<" ";
-        a = b;
-        b = c;
+        case ';':
+        case 'q':
+
+        case '(': case ')': case '+': case '-': case '*': case '/': case '%':
+            return Token(ch);
+
+        case '.':
+        case '0': case '1': case '2': case '3': case '4': case '5': case '6': case '7': case '8': case '9':
+        {
+            cin.putback(ch); //if there is a leftover token put it back in the buffer;
+            
+            double val;
+            cin>>val;
+            return Token('8', val);
+        }
+        default:
+            throw std::invalid_argument("[std::invalid_argument]: Bad Token");
     }
 }
 
+// delcare token stream
 
-int mmplier(const int& x)
+Token_stream ts;
+
+//
+
+// Operations
+
+// 1. expression
+
+double expression()
 {
-    int result = 1;
-    if(x == 1) return result;
-    if(x == 2) {result = 2; return result;}
-    for(size_t i = 3;i <= x;++i)
+    double left = term();
+    Token t = ts.get();
+    
+    while(true)
     {
-        if(x % 2 == 0)
+        switch(t.kind)
         {
-            result*=4;
-        }
-        if(x % 2 != 0)
-        {
-            result = 4;
-            result*=4;
+            case '+':
+                left += term();
+                t = ts.get();
+                break;
+            case '-':
+                left -= term();
+                t = ts.get();
+                break;
+            default:
+                ts.putback(t);
+                return left;
         }
     }
-    return result;
+}
+
+// 2. term
+
+double term()
+{
+    double left = primary();
+    Token t = ts.get();
+
+    while(true)
+    {
+        switch(t.kind)
+        {
+            case '*':
+                left *=primary();
+                t = ts.get();
+                break;
+            case '/':
+            {
+                double d = primary();
+                if(d == 0)
+                {
+                    cin.ignore(std::numeric_limits<streamsize>::max(), '\n');
+                    throw std::domain_error("[std::domain_error]: Division by 0");
+                }
+                 left/=d;
+                 t = ts.get();
+                 break;
+            }
+            default:
+                ts.putback(t);
+                return left;
+        }
+    }
+}
+
+// 3. primary
+
+double primary()
+{
+    Token t = ts.get();
+
+    switch(t.kind)
+    {
+        
+        case 'q':
+        {
+            cout<<"Exiting program..."<<endl;
+            break;
+        }
+
+        case '(':
+        {
+            double d = expression();
+            t = ts.get();
+            if(t.kind != ')')
+                throw std::domain_error("[std::domain_error]: ')' expected");
+            return d;
+        }
+        case '8':
+            return t.value;
+        default:
+            throw std::invalid_argument("[std::invalid_argument]: Primary expected");
+    }
+}
+
+// Calculator and main
+
+void calculator()
+{
+    try
+    {
+        double val = 0.0;
+    
+        while(cin)
+        {
+            Token t = ts.get();
+            if(t.kind == 'q')
+            {
+                cout<<"Exiting program..."<<endl;
+                break;
+            }
+            if(t.kind == ';')
+                cout<<"= "<<val<<endl;
+            else
+                ts.putback(t);
+
+            val = expression();
+
+        }
+    }
+    catch(const std::invalid_argument& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }
+    catch(const std::domain_error& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return;
+    }    
 }
 
 int main()
 {
-    int x = 20;
-    for(size_t i = 1;i < x;++i)
-        cout<<mmplier(i)<<" ";
+    try
+    {
+        calculator();
+    }
+    catch(const std::exception& e)
+    {
+        cerr<<e.what()<<endl;
+        keep_window_open();
+        return 0;
+    }
 }
 
